@@ -1,0 +1,206 @@
+// Область исследования
+var aoi = geometry;
+Map.centerObject(aoi, 12);
+Map.addLayer(aoi, {color: 'red'}, 'Область Чаглинка');
+
+// Период исследования
+var startDate = '2024-05-01';
+var endDate = '2024-09-30';
+
+// Загрузка снимков Sentinel-2
+var sentinel = ee.ImageCollection('COPERNICUS/S2_SR')
+  .filterBounds(aoi)
+  .filterDate(startDate, endDate)
+  .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20));
+
+print('Количество снимков:', sentinel.size());
+
+// Функции индексов
+function addNDVI(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands(ndvi);
+}
+
+function addNDMI(image) {
+  var ndmi = image.normalizedDifference(['B8', 'B11']).rename('NDMI');
+  return image.addBands(ndmi);
+}
+
+function addNDRE(image) {
+  var ndre = image.normalizedDifference(['B8', 'B5']).rename('NDRE');
+  return image.addBands(ndre);
+}
+
+function addMSAVI(image) {
+  var nir = image.select('B8');
+  var red = image.select('B4');
+  var msavi = nir.multiply(2).add(1)
+    .subtract(
+      nir.multiply(2).add(1).pow(2)
+      .subtract(nir.subtract(red).multiply(8))
+      .sqrt()
+    ).divide(2).rename('MSAVI');
+  return image.addBands(msavi);
+}
+
+function addNDWI(image) {
+  var ndwi = image.normalizedDifference(['B3', 'B8']).rename('NDWI');
+  return image.addBands(ndwi);
+}
+
+// === ДОБАВЛЕННЫЙ RECI ===
+// RECI = (NIR / RedEdge B5) - 1
+function addRECI(image) {
+  var reci = image.select('B8').divide(image.select('B5')).subtract(1).rename('RECI');
+  return image.addBands(reci);
+}
+
+// Применяем все индексы
+var sentinelWithIndices = sentinel
+  .map(addNDVI)
+  .map(addNDMI)
+  .map(addNDRE)
+  .map(addMSAVI)
+  .map(addNDWI)
+  .map(addRECI);   // <-- ДОБАВЛЕНО
+
+// Общее медианное изображение
+var imageWithIndices = sentinelWithIndices.median().clip(aoi);
+
+// Визуализация
+var rgbVis = {
+  min: 0,
+  max: 3000,
+  bands: ['B4', 'B3', 'B2']
+};
+
+var ndviVis = {
+  min: -0.2,
+  max: 0.8,
+  palette: ['red', 'yellow', 'green']
+};
+
+var ndmiVis = {
+  min: -0.5,
+  max: 0.5,
+  palette: ['brown', 'white', 'blue']
+};
+
+var reciVis = {
+  min: 0,
+  max: 3,
+  palette: ['red', 'yellow', 'green']
+};
+
+// Добавляем слои
+Map.addLayer(sentinel.median().clip(aoi), rgbVis, 'Sentinel-2 RGB', false);
+Map.addLayer(imageWithIndices.select('NDVI'), ndviVis, 'NDVI (весь период)');
+Map.addLayer(imageWithIndices.select('NDMI'), ndmiVis, 'NDMI (весь период)', false);
+Map.addLayer(imageWithIndices.select('RECI'), reciVis, 'RECI (весь период)', false);
+
+// Месячные изображения
+var may = sentinelWithIndices
+  .filterDate('2024-05-01', '2024-05-31')
+  .median()
+  .clip(aoi);
+
+var june = sentinelWithIndices
+  .filterDate('2024-06-01', '2024-06-30')
+  .median()
+  .clip(aoi);
+
+var july = sentinelWithIndices
+  .filterDate('2024-07-01', '2024-07-31')
+  .median()
+  .clip(aoi);
+
+var september = sentinelWithIndices
+  .filterDate('2024-09-01', '2024-09-30')
+  .median()
+  .clip(aoi);
+
+// Добавляем NDVI по месяцам
+Map.addLayer(may.select('NDVI'), ndviVis, 'NDVI - Май', false);
+Map.addLayer(june.select('NDVI'), ndviVis, 'NDVI - Июнь', false);
+Map.addLayer(july.select('NDVI'), ndviVis, 'NDVI - Июль', false);
+Map.addLayer(september.select('NDVI'), ndviVis, 'NDVI - Сентябрь', false);
+
+// === График NDVI ===
+var chart = ui.Chart.image.series({
+  imageCollection: sentinelWithIndices.select('NDVI'),
+  region: aoi,
+  reducer: ee.Reducer.mean(),
+  scale: 100
+}).setOptions({
+  title: 'Динамика NDVI: Май - Сентябрь 2024 (Чаглинка)',
+  vAxis: {title: 'NDVI', minValue: 0, maxValue: 1},
+  hAxis: {title: 'Дата'},
+  lineWidth: 2,
+  pointSize: 4
+});
+
+print(chart);
+
+// === Статистика по месяцам (NDVI) ===
+var mayStats = may.select('NDVI').reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: aoi,
+  scale: 100,
+  maxPixels: 1e9
+});
+
+var juneStats = june.select('NDVI').reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: aoi,
+  scale: 100,
+  maxPixels: 1e9
+});
+
+var julyStats = july.select('NDVI').reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: aoi,
+  scale: 100,
+  maxPixels: 1e9
+});
+
+var septemberStats = september.select('NDVI').reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: aoi,
+  scale: 100,
+  maxPixels: 1e9
+});
+
+print('=== Статистика NDVI по месяцам ===');
+print('Средний NDVI в мае:', mayStats.get('NDVI'));
+print('Средний NDVI в июне:', juneStats.get('NDVI'));
+print('Средний NDVI в июле:', julyStats.get('NDVI'));
+print('Средний NDVI в сентябре:', septemberStats.get('NDVI'));
+
+// Проверка наличия снимков
+print('=== Проверка всех месяцев ===');
+print('Апрель 2024:', sentinelWithIndices.filterDate('2024-04-01', '2024-04-30').size());
+print('Май 2024:', sentinelWithIndices.filterDate('2024-05-01', '2024-05-31').size());
+print('Июнь 2024:', sentinelWithIndices.filterDate('2024-06-01', '2024-06-30').size());
+print('Июль 2024:', sentinelWithIndices.filterDate('2024-07-01', '2024-07-31').size());
+print('Август 2024:', sentinelWithIndices.filterDate('2024-08-01', '2024-08-31').size());
+print('Сентябрь 2024:', sentinelWithIndices.filterDate('2024-09-01', '2024-09-30').size());
+print('Октябрь 2024:', sentinelWithIndices.filterDate('2024-10-01', '2024-10-31').size());
+
+var dates = sentinelWithIndices.aggregate_array('system:time_start')
+  .map(function(d) {
+    return ee.Date(d).format('YYYY-MM-dd');
+  });
+
+print('Все доступные даты:', dates);
+var reciStats = imageWithIndices.select('RECI').reduceRegion({
+  reducer: ee.Reducer.min()
+            .combine(ee.Reducer.max(), '', true)
+            .combine(ee.Reducer.mean(), '', true)
+            .combine(ee.Reducer.stdDev(), '', true)
+            .combine(ee.Reducer.median(), '', true),
+  geometry: aoi,
+  scale: 10,
+  maxPixels: 1e13
+});
+
+print('Статистика RECI:', reciStats);
