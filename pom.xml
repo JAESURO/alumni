@@ -7,17 +7,40 @@
   <version>1.0-SNAPSHOT</version>
   <name>yield-forecast</name>
   <url>http://maven.apache.org</url>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.0</version>
+    <relativePath/> <!-- lookup parent from repository -->
+  </parent>
+
   <properties>
+    <java.version>17</java.version>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
   </properties>
+
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-community-dialects</artifactId>
+      <version>6.4.0.Final</version>
+    </dependency>
+    
+    <!-- Existing dependencies -->
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
@@ -28,5 +51,20 @@
       <artifactId>dotenv-java</artifactId>
       <version>3.0.0</version>
     </dependency>
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>3.8.1</version>
+        <scope>test</scope>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>
