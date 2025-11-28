@@ -1,13 +1,10 @@
-// Область исследования
 var aoi = geometry;
 Map.centerObject(aoi, 12);
 Map.addLayer(aoi, {color: 'red'}, 'Область Чаглинка');
 
-// Период исследования
 var startDate = '2024-05-01';
 var endDate = '2024-09-30';
 
-// Загрузка снимков Sentinel-2
 var sentinel = ee.ImageCollection('COPERNICUS/S2_SR')
   .filterBounds(aoi)
   .filterDate(startDate, endDate)
@@ -15,7 +12,6 @@ var sentinel = ee.ImageCollection('COPERNICUS/S2_SR')
 
 print('Количество снимков:', sentinel.size());
 
-// Функции индексов
 function addNDVI(image) {
   var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
   return image.addBands(ndvi);
@@ -48,14 +44,12 @@ function addNDWI(image) {
   return image.addBands(ndwi);
 }
 
-// === ДОБАВЛЕННЫЙ RECI ===
 // RECI = (NIR / RedEdge B5) - 1
 function addRECI(image) {
   var reci = image.select('B8').divide(image.select('B5')).subtract(1).rename('RECI');
   return image.addBands(reci);
 }
 
-// Применяем все индексы
 var sentinelWithIndices = sentinel
   .map(addNDVI)
   .map(addNDMI)
@@ -64,10 +58,8 @@ var sentinelWithIndices = sentinel
   .map(addNDWI)
   .map(addRECI);   // <-- ДОБАВЛЕНО
 
-// Общее медианное изображение
 var imageWithIndices = sentinelWithIndices.median().clip(aoi);
 
-// Визуализация
 var rgbVis = {
   min: 0,
   max: 3000,
@@ -92,13 +84,11 @@ var reciVis = {
   palette: ['red', 'yellow', 'green']
 };
 
-// Добавляем слои
 Map.addLayer(sentinel.median().clip(aoi), rgbVis, 'Sentinel-2 RGB', false);
 Map.addLayer(imageWithIndices.select('NDVI'), ndviVis, 'NDVI (весь период)');
 Map.addLayer(imageWithIndices.select('NDMI'), ndmiVis, 'NDMI (весь период)', false);
 Map.addLayer(imageWithIndices.select('RECI'), reciVis, 'RECI (весь период)', false);
 
-// Месячные изображения
 var may = sentinelWithIndices
   .filterDate('2024-05-01', '2024-05-31')
   .median()
@@ -119,13 +109,11 @@ var september = sentinelWithIndices
   .median()
   .clip(aoi);
 
-// Добавляем NDVI по месяцам
 Map.addLayer(may.select('NDVI'), ndviVis, 'NDVI - Май', false);
 Map.addLayer(june.select('NDVI'), ndviVis, 'NDVI - Июнь', false);
 Map.addLayer(july.select('NDVI'), ndviVis, 'NDVI - Июль', false);
 Map.addLayer(september.select('NDVI'), ndviVis, 'NDVI - Сентябрь', false);
 
-// === График NDVI ===
 var chart = ui.Chart.image.series({
   imageCollection: sentinelWithIndices.select('NDVI'),
   region: aoi,
@@ -141,7 +129,6 @@ var chart = ui.Chart.image.series({
 
 print(chart);
 
-// === Статистика по месяцам (NDVI) ===
 var mayStats = may.select('NDVI').reduceRegion({
   reducer: ee.Reducer.mean(),
   geometry: aoi,
@@ -176,7 +163,6 @@ print('Средний NDVI в июне:', juneStats.get('NDVI'));
 print('Средний NDVI в июле:', julyStats.get('NDVI'));
 print('Средний NDVI в сентябре:', septemberStats.get('NDVI'));
 
-// Проверка наличия снимков
 print('=== Проверка всех месяцев ===');
 print('Апрель 2024:', sentinelWithIndices.filterDate('2024-04-01', '2024-04-30').size());
 print('Май 2024:', sentinelWithIndices.filterDate('2024-05-01', '2024-05-31').size());
