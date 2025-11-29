@@ -40,7 +40,8 @@ public class YieldForecast {
 
         ProcessBuilder pb = new ProcessBuilder(pythonPath, "src/main/python/yield_forecast.py");
         pb.environment().put("GEE_PROJECT_ID", dotenv.get("GEE_PROJECT_ID", ""));
-        pb.redirectErrorStream(true);
+        // pb.redirectErrorStream(true); // Don't merge stderr into stdout
+        pb.redirectError(ProcessBuilder.Redirect.INHERIT); // Send stderr to console directly
         Process process = pb.start();
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -55,6 +56,12 @@ public class YieldForecast {
             throw new RuntimeException("Python script failed with exit code " + exitCode + ": " + output);
         }
 
-        return new JSONObject(output.toString());
+        String outputString = output.toString();
+        int jsonStart = outputString.indexOf("{");
+        if (jsonStart == -1) {
+            throw new RuntimeException("No JSON output found from Python script. Output: " + outputString);
+        }
+        String jsonString = outputString.substring(jsonStart);
+        return new JSONObject(jsonString);
     }
 }

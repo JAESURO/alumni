@@ -2,6 +2,10 @@ import ee
 import json
 import sys
 import os
+import warnings
+
+# Suppress warnings to ensure only JSON is output to stdout
+warnings.filterwarnings("ignore")
 
 def main():
     try:
