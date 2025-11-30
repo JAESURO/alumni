@@ -1,0 +1,19 @@
+## application.properties.example
+# Template for local configuration. DO NOT commit secrets here.
+# Copy this file to application.properties locally and fill in values as needed.
+
+spring.datasource.url=jdbc:sqlite:yield_forecast.db
+spring.datasource.driver-class-name=org.sqlite.JDBC
+spring.jpa.database-platform=org.hibernate.community.dialect.SQLiteDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Local Python executable to use when invoking the GEE script
+# Example (Windows venv): .venv\Scripts\python.exe
+python.executable=
+# Path to the python script in your filesystem (default: src/main/python/yield_forecast.py)
+python.script.path=src/main/python/yield_forecast.py
+
+# Optional: your GEE project id used by earthengine ee.Initialize(project=...)
+# Leave empty to rely on default authentication or environment variable GEE_PROJECT_ID
+gee.project.id=
