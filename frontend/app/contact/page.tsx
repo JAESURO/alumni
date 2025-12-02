@@ -21,15 +21,12 @@ export default function ContactPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implement actual contact form submission
-        console.log('Contact form submitted:', formData);
         alert('Thank you for your message! We will get back to you soon.');
         setFormData({ name: '', email: '', subject: '', message: '' });
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-            {/* Navigation */}
             <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
@@ -49,7 +46,6 @@ export default function ContactPage() {
                 </div>
             </nav>
 
-            {/* Contact Section */}
             <div className="max-w-7xl mx-auto px-4 py-16">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -62,9 +58,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Contact Information */}
                     <div className="lg:col-span-1 space-y-6">
-                        {/* Email */}
                         <div className="bg-white rounded-xl p-6 shadow-lg">
                             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                                 <Mail className="w-6 h-6 text-green-600" />
@@ -81,7 +75,6 @@ export default function ContactPage() {
                             </a>
                         </div>
 
-                        {/* Phone */}
                         <div className="bg-white rounded-xl p-6 shadow-lg">
                             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                                 <Phone className="w-6 h-6 text-green-600" />
@@ -96,7 +89,6 @@ export default function ContactPage() {
                             </a>
                         </div>
 
-                        {/* Office */}
                         <div className="bg-white rounded-xl p-6 shadow-lg">
                             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                                 <MapPin className="w-6 h-6 text-green-600" />
@@ -113,7 +105,6 @@ export default function ContactPage() {
                             </p>
                         </div>
 
-                        {/* Support */}
                         <div className="bg-white rounded-xl p-6 shadow-lg">
                             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                                 <MessageSquare className="w-6 h-6 text-green-600" />
@@ -130,7 +121,6 @@ export default function ContactPage() {
                         </div>
                     </div>
 
-                    {/* Contact Form */}
                     <div className="lg:col-span-2">
                         <div className="bg-white rounded-2xl shadow-xl p-8">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">
@@ -138,7 +128,6 @@ export default function ContactPage() {
                             </h2>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                {/* Name */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Your Name
@@ -155,7 +144,6 @@ export default function ContactPage() {
                                     />
                                 </div>
 
-                                {/* Email */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Email Address
@@ -172,7 +160,6 @@ export default function ContactPage() {
                                     />
                                 </div>
 
-                                {/* Subject */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Subject
@@ -189,7 +176,6 @@ export default function ContactPage() {
                                     />
                                 </div>
 
-                                {/* Message */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Message
@@ -206,7 +192,6 @@ export default function ContactPage() {
                                     />
                                 </div>
 
-                                {/* Submit Button */}
                                 <button
                                     type="submit"
                                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center"
@@ -216,7 +201,6 @@ export default function ContactPage() {
                                 </button>
                             </form>
 
-                            {/* Additional Info */}
                             <div className="mt-8 pt-8 border-t border-gray-200">
                                 <p className="text-sm text-gray-600 text-center">
                                     By submitting this form, you agree to our{' '}
@@ -233,7 +217,6 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                {/* FAQ Section */}
                 <div className="mt-16">
                     <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">
                         Frequently Asked Questions

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
@@ -11,16 +12,20 @@ export default function LoginPage() {
         password: '',
     });
 
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: Implement actual authentication logic
-        console.log('Login attempt:', formData);
+        setIsLoading(true);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        router.push('/dashboard');
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                {/* Logo/Brand */}
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-green-800 mb-2">
                         🌾 YieldForecast
@@ -28,14 +33,12 @@ export default function LoginPage() {
                     <p className="text-gray-600">Agricultural Intelligence Platform</p>
                 </div>
 
-                {/* Login Card */}
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <h2 className="text-2xl font-bold text-gray-800 mb-6">
                         Welcome Back
                     </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Email Field */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address
@@ -55,7 +58,6 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Password Field */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Password
@@ -86,7 +88,6 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Remember Me & Forgot Password */}
                         <div className="flex items-center justify-between text-sm">
                             <label className="flex items-center">
                                 <input
@@ -103,16 +104,19 @@ export default function LoginPage() {
                             </Link>
                         </div>
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl"
+                            disabled={isLoading}
+                            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center"
                         >
-                            Sign In
+                            {isLoading ? (
+                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            ) : (
+                                'Sign In'
+                            )}
                         </button>
                     </form>
 
-                    {/* Divider */}
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
@@ -124,7 +128,6 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    {/* Sign Up Link */}
                     <Link
                         href="/register"
                         className="block w-full text-center py-3 border-2 border-green-600 text-green-600 rounded-lg font-semibold hover:bg-green-50 transition"
@@ -133,7 +136,6 @@ export default function LoginPage() {
                     </Link>
                 </div>
 
-                {/* Footer */}
                 <p className="text-center text-gray-500 text-sm mt-6">
                     By continuing, you agree to our{' '}
                     <Link href="/terms" className="text-green-600 hover:underline">

@@ -21,14 +21,11 @@ export default function RegisterPage() {
             alert('Passwords do not match!');
             return;
         }
-        // TODO: Implement actual registration logic
-        console.log('Registration attempt:', formData);
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                {/* Logo/Brand */}
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-green-800 mb-2">
                         🌾 YieldForecast
@@ -36,14 +33,12 @@ export default function RegisterPage() {
                     <p className="text-gray-600">Join the Agricultural Revolution</p>
                 </div>
 
-                {/* Registration Card */}
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <h2 className="text-2xl font-bold text-gray-800 mb-6">
                         Create Account
                     </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Full Name */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Full Name
@@ -63,7 +58,6 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        {/* Email */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Email Address
@@ -83,7 +77,6 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        {/* Organization */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Organization (Optional)
@@ -102,7 +95,6 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        {/* Password */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Password
@@ -133,7 +125,6 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        {/* Confirm Password */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Confirm Password
@@ -167,7 +158,6 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        {/* Terms Agreement */}
                         <div className="flex items-start">
                             <input
                                 type="checkbox"
@@ -192,7 +182,6 @@ export default function RegisterPage() {
                             </label>
                         </div>
 
-                        {/* Submit Button */}
                         <button
                             type="submit"
                             className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl mt-6"
@@ -201,7 +190,6 @@ export default function RegisterPage() {
                         </button>
                     </form>
 
-                    {/* Divider */}
                     <div className="relative my-6">
                         <div className="absolute inset-0 flex items-center">
                             <div className="w-full border-t border-gray-300"></div>
@@ -213,7 +201,6 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    {/* Sign In Link */}
                     <Link
                         href="/login"
                         className="block w-full text-center py-3 border-2 border-green-600 text-green-600 rounded-lg font-semibold hover:bg-green-50 transition"

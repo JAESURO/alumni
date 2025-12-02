@@ -1,9 +1,6 @@
 target/
-venv/
+frontend/node_modules/
+frontend/.next/
 .env
-*.db
-.idea/
-*.class
-*.log
-.DS_Store
-src/main/resources/application.properties
+frontend/.env.local
+yield_forecast.db

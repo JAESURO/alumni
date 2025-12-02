@@ -10,10 +10,13 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
+import MapWrapper from './components/MapWrapper';
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
+
+
       <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-200 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -59,7 +62,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
+
       <section className="pt-32 pb-20 px-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-3xl mx-auto">
@@ -91,7 +94,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Stats */}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
             <div className="bg-white rounded-xl p-6 shadow-lg text-center">
               <div className="text-4xl font-bold text-green-600 mb-2">
@@ -115,7 +118,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Features Section */}
+
       <section id="features" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
@@ -128,7 +131,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
+
             <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition border border-gray-100">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <TrendingUp className="w-6 h-6 text-green-600" />
@@ -142,7 +145,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Feature 2 */}
+
             <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition border border-gray-100">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <MapPin className="w-6 h-6 text-green-600" />
@@ -156,7 +159,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Feature 3 */}
+
             <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition border border-gray-100">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <BarChart3 className="w-6 h-6 text-green-600" />
@@ -170,7 +173,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Feature 4 */}
+
             <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition border border-gray-100">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <Shield className="w-6 h-6 text-green-600" />
@@ -184,7 +187,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Feature 5 */}
+
             <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition border border-gray-100">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-green-600" />
@@ -198,7 +201,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Feature 6 */}
+
             <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-xl transition border border-gray-100">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                 <Sprout className="w-6 h-6 text-green-600" />
@@ -215,7 +218,22 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How It Works */}
+
+      <section className="py-20 px-4 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Live Yield Map
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Explore real-time yield predictions across different regions.
+            </p>
+          </div>
+          <MapWrapper />
+        </div>
+      </section>
+
+
       <section
         id="how-it-works"
         className="py-20 px-4 bg-gradient-to-br from-green-50 to-emerald-50"
@@ -273,7 +291,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+
       <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-12 text-center text-white shadow-2xl">
           <h2 className="text-4xl font-bold mb-4">
@@ -301,7 +319,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Footer */}
+
       <footer className="bg-gray-900 text-gray-300 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
