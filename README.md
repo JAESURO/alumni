@@ -163,7 +163,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8080
 ### Backend (`application.properties`)
 ```properties
 spring.datasource.url=jdbc:sqlite:yield_forecast.db
-python.executable=${PYTHON_VENV_PATH:/home/suros/Documents/Tools/Languages/venv/bin/python3}
+python.executable=${PYTHON_VENV_PATH:python3}
 server.port=8080
 logging.level.com.yieldforecast=DEBUG
 ```
