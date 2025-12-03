@@ -38,6 +38,8 @@ interface YieldRecord {
 
 interface MapComponentProps {
     onZoneDrawn?: (geometry: any) => void;
+    onZoneEdited?: (geometry: any) => void;
+    onZoneDeleted?: () => void;
     selectedGeometry?: any;
     mapCenter?: [number, number];
 }
@@ -97,7 +99,7 @@ function SelectedGeometryLayer({ geometry }: { geometry: any }) {
     return null;
 }
 
-export default function MapComponent({ onZoneDrawn, selectedGeometry, mapCenter }: MapComponentProps) {
+export default function MapComponent({ onZoneDrawn, onZoneEdited, onZoneDeleted, selectedGeometry, mapCenter }: MapComponentProps) {
     const [yields, setYields] = useState<YieldRecord[]>([]);
 
     useEffect(() => {
@@ -131,6 +133,27 @@ export default function MapComponent({ onZoneDrawn, selectedGeometry, mapCenter 
         }
     };
 
+    const handleEdited = (e: any) => {
+        const layers = e.layers;
+        layers.eachLayer((layer: any) => {
+            const geoJSON = layer.toGeoJSON();
+            let geometry = geoJSON.geometry;
+            if (layer instanceof L.Circle) {
+                const radius = layer.getRadius();
+                geometry = { ...geometry, radius: radius };
+            }
+            if (onZoneEdited) {
+                onZoneEdited(geometry);
+            }
+        });
+    };
+
+    const handleDeleted = (e: any) => {
+        if (onZoneDeleted) {
+            onZoneDeleted();
+        }
+    };
+
     return (
         <div className="h-full w-full rounded-lg overflow-hidden">
             <MapContainer
@@ -149,6 +172,8 @@ export default function MapComponent({ onZoneDrawn, selectedGeometry, mapCenter 
                     <EditControl
                         position="topright"
                         onCreated={handleCreated}
+                        onEdited={handleEdited}
+                        onDeleted={handleDeleted}
                         draw={{
                             rectangle: true,
                             polygon: true,
@@ -158,8 +183,8 @@ export default function MapComponent({ onZoneDrawn, selectedGeometry, mapCenter 
                             polyline: false,
                         }}
                         edit={{
-                            edit: false,
-                            remove: false,
+                            edit: true,
+                            remove: true,
                         }}
                     />
                 </FeatureGroup>

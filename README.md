@@ -178,8 +178,8 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080
 
 ### Port Already in Use
 ```bash
-fuser -k 8080/tcp  # Kill process on port 8080
-fuser -k 3000/tcp  # Kill process on port 3000
+fuser -k 8080/tcp
+fuser -k 3000/tcp 
 ```
 
 ### Python Script Timeout
@@ -208,12 +208,5 @@ mvn test
 ### Database Location
 ```
 ./yield_forecast.db
+
 ```
-
-## License
-
-[Your License Here]
-
-## Contributors
-
-[Your Name/Team]
