@@ -30,6 +30,16 @@ public class YieldRecord {
 
     private String parameter;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_yield_record_user"))
+    private User user;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate startDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate endDate;
+
     public YieldRecord() {
     }
 
@@ -122,5 +132,43 @@ public class YieldRecord {
 
     public void setParameter(String parameter) {
         this.parameter = parameter;
+    }
+
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
+
+    public void setUserId(Long userId) {
+        if (userId != null) {
+            this.user = new User();
+            this.user.setId(userId);
+        } else {
+            this.user = null;
+        }
+    }
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 }

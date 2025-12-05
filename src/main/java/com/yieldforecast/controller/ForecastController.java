@@ -1,6 +1,7 @@
 package com.yieldforecast.controller;
 
 import com.yieldforecast.service.ForecastService;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +24,13 @@ public class ForecastController {
     private ForecastService forecastService;
 
     @PostMapping("/run")
-    public ResponseEntity<String> runForecast(@RequestBody Map<String, Object> payload) {
+    public ResponseEntity<String> runForecast(@RequestBody Map<String, Object> payload, HttpSession session) {
         logger.info("Received /run request.");
 
+        Long userId = (Long) session.getAttribute("userId");
         CompletableFuture.runAsync(() -> {
             try {
-                forecastService.processForecast(payload);
+                forecastService.processForecast(payload, userId);
             } catch (Exception e) {
                 logger.error("Forecast execution failed in background task", e);
             }

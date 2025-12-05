@@ -67,7 +67,8 @@ export default function ForecastResults({
                         <thead>
                             <tr className="border-b border-gray-200 bg-gray-50">
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Coordinates</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parameter</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Index</th>
@@ -90,7 +91,13 @@ export default function ForecastResults({
                                     <td className="px-4 py-3 text-sm text-gray-600">
                                         <div className="flex items-center space-x-2">
                                             <Calendar className="w-4 h-4 text-gray-400" />
-                                            <span>{formatDate(record.date)}</span>
+                                            <span>{record.startDate ? formatDate(record.startDate) : 'N/A'}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-gray-600">
+                                        <div className="flex items-center space-x-2">
+                                            <Calendar className="w-4 h-4 text-gray-400" />
+                                            <span>{record.endDate ? formatDate(record.endDate) : 'N/A'}</span>
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 text-sm text-gray-600 font-mono">
@@ -104,7 +111,10 @@ export default function ForecastResults({
                                                 e.stopPropagation();
                                                 if (!confirm('Delete this record?')) return;
                                                 try {
-                                                    const res = await fetch(`${API_URL}/api/yields/${record.id}`, { method: 'DELETE' });
+                                                    const res = await fetch(`${API_URL}/api/yields/${record.id}`, {
+                                                        method: 'DELETE',
+                                                        credentials: 'include'
+                                                    });
                                                     if (res.ok) {
                                                         setMessage('Record deleted');
                                                         fetchYieldData();

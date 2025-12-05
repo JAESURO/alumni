@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { API_URL } from '../config/api';
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -18,9 +19,26 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
-        router.push('/dashboard');
+        try {
+            const response = await fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                router.push('/dashboard');
+            } else {
+                const error = await response.json();
+                alert(error.error || 'Login failed');
+                setIsLoading(false);
+            }
+        } catch (error) {
+            alert('Network error. Please try again.');
+            setIsLoading(false);
+        }
     };
 
     return (

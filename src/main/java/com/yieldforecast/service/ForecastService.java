@@ -51,9 +51,9 @@ public class ForecastService {
         return output.substring(jsonStart);
     }
 
-    public void processForecast(Map<String, Object> payload) {
+    public void processForecast(Map<String, Object> payload, Long userId) {
         try {
-            logger.info("Processing forecast payload");
+            logger.info("Processing forecast payload for user {}", userId);
 
             String location = payload.getOrDefault("location", "Custom Zone").toString();
             String date = payload.getOrDefault("date", LocalDate.now().toString()).toString();
@@ -73,7 +73,8 @@ public class ForecastService {
 
             if (resultCache.containsKey(cacheKey)) {
                 logger.info("Using cached result for key {}", cacheKey);
-                processCachedResult(resultCache.get(cacheKey), geometryJson, location, date, parameter, payload);
+                processCachedResult(resultCache.get(cacheKey), geometryJson, location, date, parameter, payload, userId,
+                        startDate, endDate);
                 return;
             }
 
@@ -100,7 +101,7 @@ public class ForecastService {
             String jsonString = output.substring(jsonStart);
             resultCache.put(cacheKey, jsonString);
 
-            saveRecord(jsonString, geometryJson, location, date, parameter, payload);
+            saveRecord(jsonString, geometryJson, location, date, parameter, payload, userId, startDate, endDate);
 
         } catch (Exception e) {
             logger.error("Error in processForecast", e);
@@ -120,12 +121,12 @@ public class ForecastService {
     }
 
     private void processCachedResult(String jsonString, String geometryJson, String location, String date,
-            String parameter, Map<String, Object> payload) {
-        saveRecord(jsonString, geometryJson, location, date, parameter, payload);
+            String parameter, Map<String, Object> payload, Long userId, String startDate, String endDate) {
+        saveRecord(jsonString, geometryJson, location, date, parameter, payload, userId, startDate, endDate);
     }
 
     private void saveRecord(String jsonString, String geometryJson, String location, String date, String parameter,
-            Map<String, Object> payload) {
+            Map<String, Object> payload, Long userId, String startDate, String endDate) {
         JSONObject geeData = new JSONObject(jsonString);
         if (geeData.has("error")) {
             logger.warn("GEE returned error: {}", geeData.toString());
@@ -170,6 +171,9 @@ public class ForecastService {
         record.setLongitude(longitude);
         record.setGeometryJson(geometryJson);
         record.setParameter(parameter);
+        record.setUserId(userId);
+        record.setStartDate(startDate != null ? LocalDate.parse(startDate) : null);
+        record.setEndDate(endDate != null ? LocalDate.parse(endDate) : null);
 
         repository.save(record);
         logger.info("Record saved successfully");

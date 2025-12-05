@@ -2,11 +2,14 @@ export interface YieldRecord {
     id: number;
     location: string;
     date: string;
+    prediction: number;
     latitude: number;
     longitude: number;
-    prediction: number;
-    geometryJson?: string;
-    parameter?: string;
+    geometryJson: string;
+    parameter: string;
+    userId: number;
+    startDate: string;
+    endDate: string;
     indexValue?: number;
 }
 

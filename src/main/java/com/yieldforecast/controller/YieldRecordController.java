@@ -2,6 +2,7 @@ package com.yieldforecast.controller;
 
 import com.yieldforecast.entity.YieldRecord;
 import com.yieldforecast.repository.YieldRecordRepository;
+import com.yieldforecast.service.AuthorizationService;
 import com.yieldforecast.service.GeometryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,16 +26,29 @@ public class YieldRecordController {
     @Autowired
     private GeometryService geometryService;
 
+    @Autowired
+    private AuthorizationService authorizationService;
+
     @GetMapping
-    public List<YieldRecord> getAllYields() {
+    public ResponseEntity<?> getAllYields(jakarta.servlet.http.HttpSession session) {
         logger.info("=== GET /api/yields REQUEST RECEIVED ===");
-        List<YieldRecord> records = repository.findAll();
+        Long userId = (Long) session.getAttribute("userId");
+
+        List<YieldRecord> records;
+        if (userId == null) {
+            logger.info("No userId in session - returning all records");
+            records = repository.findAll();
+        } else {
+            logger.info("userId in session: {} - returning user-specific records", userId);
+            records = repository.findByUserIdOrderByDateDesc(userId);
+        }
+
         logger.info("Found {} yield records", records.size());
         for (YieldRecord record : records) {
             logger.info("  - ID: {}, Location: {}, Parameter: {}", record.getId(), record.getLocation(),
                     record.getParameter());
         }
-        return records;
+        return ResponseEntity.ok(records);
     }
 
     @GetMapping("/{id}")
@@ -66,11 +80,24 @@ public class YieldRecordController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteYield(@PathVariable Long id) {
-        if (repository.existsById(id)) {
+    public ResponseEntity<?> deleteYield(@PathVariable Long id, jakarta.servlet.http.HttpSession session) {
+        try {
+            Long userId = (Long) session.getAttribute("userId");
+
+            authorizationService.requireAuthentication(userId);
+
+            authorizationService.verifyRecordOwnership(id, userId);
+
             repository.deleteById(id);
-            return ResponseEntity.ok().build();
+            logger.info("Record {} deleted by user {}", id, userId);
+
+            return ResponseEntity.ok(Map.of("message", "Record deleted successfully"));
+        } catch (org.springframework.web.server.ResponseStatusException e) {
+            logger.warn("Delete failed for record {}: {}", id, e.getReason());
+            return ResponseEntity.status(e.getStatusCode()).body(Map.of("error", e.getReason()));
+        } catch (Exception e) {
+            logger.error("Unexpected error deleting record {}", id, e);
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
         }
-        return ResponseEntity.notFound().build();
     }
 }

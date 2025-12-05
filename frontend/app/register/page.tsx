@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mail, Lock, User, Eye, EyeOff, Building } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Building, Phone } from 'lucide-react';
+import { API_URL } from '../config/api';
 
 export default function RegisterPage() {
     const [showPassword, setShowPassword] = useState(false);
@@ -11,6 +12,7 @@ export default function RegisterPage() {
         fullName: '',
         email: '',
         organization: '',
+        phoneNumber: '',
         password: '',
         confirmPassword: '',
     });
@@ -20,6 +22,30 @@ export default function RegisterPage() {
         if (formData.password !== formData.confirmPassword) {
             alert('Passwords do not match!');
             return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/api/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password,
+                    fullName: formData.fullName,
+                    phoneNumber: formData.phoneNumber,
+                    organization: formData.organization
+                })
+            });
+
+            if (response.ok) {
+                alert('Registration successful! Please login.');
+                window.location.href = '/login';
+            } else {
+                const error = await response.json();
+                alert(error.error || 'Registration failed');
+            }
+        } catch (error) {
+            alert('Network error. Please try again.');
         }
     };
 
@@ -91,6 +117,25 @@ export default function RegisterPage() {
                                     }
                                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
                                     placeholder="Your Farm or Company"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Phone Number
+                            </label>
+                            <div className="relative">
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <input
+                                    type="tel"
+                                    required
+                                    value={formData.phoneNumber}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, phoneNumber: e.target.value })
+                                    }
+                                    className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                                    placeholder="+1 234 567 8900"
                                 />
                             </div>
                         </div>

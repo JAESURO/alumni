@@ -36,7 +36,9 @@ export default function DashboardPage() {
 
     const fetchYieldData = async () => {
         try {
-            const res = await fetch(`${API_URL}/api/yields`);
+            const res = await fetch(`${API_URL}/api/yields`, {
+                credentials: 'include'
+            });
             if (res.ok) {
                 const text = await res.text();
                 try {
@@ -95,6 +97,7 @@ export default function DashboardPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify({
                     geometry: geometry,
                     startDate: formData.startDate,
@@ -224,6 +227,7 @@ export default function DashboardPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
                 body: JSON.stringify(payload),
             });
 
