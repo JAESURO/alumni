@@ -29,10 +29,23 @@ export default function DashboardPage() {
     const [dataAvailability, setDataAvailability] = useState<DataAvailability | null>(null);
     const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
     const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+    const [tileLayers, setTileLayers] = useState<{
+        NDVI?: { url: string; opacity: number };
+        NDMI?: { url: string; opacity: number };
+        RECI?: { url: string; opacity: number };
+    }>({});
 
     useEffect(() => {
         fetchYieldData();
     }, []);
+
+    useEffect(() => {
+        if (drawnGeometry && formData.parameter) {
+            fetchVisualization(formData.parameter);
+        } else {
+            setTileLayers({});
+        }
+    }, [drawnGeometry, formData.parameter, formData.startDate, formData.endDate]);
 
     const fetchYieldData = async () => {
         try {
@@ -198,6 +211,40 @@ export default function DashboardPage() {
         setMessage('');
     };
 
+    const fetchVisualization = async (parameter: string) => {
+        if (!drawnGeometry) return;
+
+        try {
+            const res = await fetch(`${API_URL}/api/forecast/visualization`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    geometry: drawnGeometry,
+                    startDate: formData.startDate,
+                    endDate: formData.endDate,
+                    parameter: parameter
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.tile_url) {
+                    setTileLayers({
+                        [parameter]: {
+                            url: data.tile_url,
+                            opacity: 0.7
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching visualization:', error);
+        }
+    };
+
     const runForecast = async () => {
         if (!formData.location.trim()) {
             setMessage('Please enter a Zone Name.');
@@ -251,7 +298,6 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Navbar */}
             <nav className="bg-white shadow-sm border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
@@ -304,6 +350,7 @@ export default function DashboardPage() {
                                 onZoneDeleted={handleZoneDeleted}
                                 selectedGeometry={selectedGeometry}
                                 mapCenter={mapCenter}
+                                tileLayers={tileLayers}
                             />
                         </div>
 

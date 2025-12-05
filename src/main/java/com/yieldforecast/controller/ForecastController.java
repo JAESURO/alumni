@@ -49,4 +49,15 @@ public class ForecastController {
             return ResponseEntity.status(500).body("{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
+
+    @PostMapping("/visualization")
+    public ResponseEntity<String> getVisualization(@RequestBody Map<String, Object> payload) {
+        try {
+            String result = forecastService.getVisualization(payload);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            logger.error("Exception in getVisualization", e);
+            return ResponseEntity.status(500).body("{\"error\":\"" + e.getMessage() + "\"}");
+        }
+    }
 }

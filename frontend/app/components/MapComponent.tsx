@@ -36,12 +36,22 @@ interface YieldRecord {
     longitude: number;
 }
 
+interface TileLayerData {
+    url: string;
+    opacity: number;
+}
+
 interface MapComponentProps {
     onZoneDrawn?: (geometry: any) => void;
     onZoneEdited?: (geometry: any) => void;
     onZoneDeleted?: () => void;
     selectedGeometry?: any;
     mapCenter?: [number, number];
+    tileLayers?: {
+        NDVI?: TileLayerData;
+        NDMI?: TileLayerData;
+        RECI?: TileLayerData;
+    };
 }
 
 function SelectedGeometryLayer({ geometry }: { geometry: any }) {
@@ -99,7 +109,54 @@ function SelectedGeometryLayer({ geometry }: { geometry: any }) {
     return null;
 }
 
-export default function MapComponent({ onZoneDrawn, onZoneEdited, onZoneDeleted, selectedGeometry, mapCenter }: MapComponentProps) {
+function TileLayerManager({ tileLayers }: { tileLayers?: { [key: string]: TileLayerData } }) {
+    const map = useMap();
+    const layersRef = useRef<{ [key: string]: L.TileLayer }>({});
+
+    useEffect(() => {
+        if (!tileLayers) return;
+
+        Object.entries(tileLayers).forEach(([key, data]) => {
+            if (data && data.url) {
+                if (layersRef.current[key]) {
+                    layersRef.current[key].setOpacity(data.opacity);
+                } else {
+                    const tileLayer = L.tileLayer(data.url, {
+                        opacity: data.opacity,
+                        attribution: 'Google Earth Engine'
+                    });
+                    tileLayer.addTo(map);
+                    layersRef.current[key] = tileLayer;
+                }
+            } else if (layersRef.current[key]) {
+                map.removeLayer(layersRef.current[key]);
+                delete layersRef.current[key];
+            }
+        });
+
+        const currentKeys = Object.keys(layersRef.current);
+        const newKeys = Object.keys(tileLayers || {});
+        const removedKeys = currentKeys.filter(k => !newKeys.includes(k));
+
+        removedKeys.forEach(key => {
+            if (layersRef.current[key]) {
+                map.removeLayer(layersRef.current[key]);
+                delete layersRef.current[key];
+            }
+        });
+
+        return () => {
+            Object.values(layersRef.current).forEach(layer => {
+                map.removeLayer(layer);
+            });
+            layersRef.current = {};
+        };
+    }, [tileLayers, map]);
+
+    return null;
+}
+
+export default function MapComponent({ onZoneDrawn, onZoneEdited, onZoneDeleted, selectedGeometry, mapCenter, tileLayers }: MapComponentProps) {
     const [yields, setYields] = useState<YieldRecord[]>([]);
 
     useEffect(() => {
@@ -167,6 +224,7 @@ export default function MapComponent({ onZoneDrawn, onZoneEdited, onZoneDeleted,
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <MapController center={mapCenter} />
+                <TileLayerManager tileLayers={tileLayers} />
                 <SelectedGeometryLayer geometry={selectedGeometry} />
                 <FeatureGroup>
                     <EditControl
@@ -179,7 +237,7 @@ export default function MapComponent({ onZoneDrawn, onZoneEdited, onZoneDeleted,
                             polygon: true,
                             circle: true,
                             circlemarker: false,
-                            marker: true,
+                            marker: false,
                             polyline: false,
                         }}
                         edit={{

@@ -106,8 +106,35 @@ public class ForecastService {
         } catch (Exception e) {
             logger.error("Error in processForecast", e);
             logger.error("Exception details: {}", e.getMessage());
-            logger.error("Stack trace:", e);
+            logger.error("Error saving record", e);
         }
+    }
+
+    public String getVisualization(Map<String, Object> payload) throws Exception {
+        Object geometryObj = payload.get("geometry");
+        if (geometryObj == null) {
+            throw new IllegalArgumentException("No geometry provided");
+        }
+
+        String geometryJson = getGeometryJson(geometryObj);
+        String startDate = payload.getOrDefault("startDate", "2024-01-01").toString();
+        String endDate = payload.getOrDefault("endDate", "2024-12-31").toString();
+        String parameter = payload.getOrDefault("parameter", "NDVI").toString();
+
+        List<String> args = new ArrayList<>();
+        args.add(geometryJson);
+        args.add(startDate);
+        args.add(endDate);
+        args.add(parameter);
+
+        String output = pythonExecutionService.executeScript("src/main/python/get_visualization.py", args);
+
+        int jsonStart = output.indexOf("{");
+        if (jsonStart == -1) {
+            throw new RuntimeException("No JSON returned from visualization");
+        }
+
+        return output.substring(jsonStart);
     }
 
     private String getGeometryJson(Object geometryObj) {
