@@ -39,6 +39,7 @@ interface YieldRecord {
 interface TileLayerData {
     url: string;
     opacity: number;
+    visible: boolean;
 }
 
 interface MapComponentProps {
@@ -52,6 +53,8 @@ interface MapComponentProps {
         NDMI?: TileLayerData;
         RECI?: TileLayerData;
     };
+    onToggleLayer?: (parameter: string) => void;
+    onOpacityChange?: (parameter: string, opacity: number) => void;
 }
 
 function SelectedGeometryLayer({ geometry }: { geometry: any }) {
@@ -117,7 +120,7 @@ function TileLayerManager({ tileLayers }: { tileLayers?: { [key: string]: TileLa
         if (!tileLayers) return;
 
         Object.entries(tileLayers).forEach(([key, data]) => {
-            if (data && data.url) {
+            if (data && data.url && data.visible) {
                 if (layersRef.current[key]) {
                     layersRef.current[key].setOpacity(data.opacity);
                 } else {
@@ -156,7 +159,18 @@ function TileLayerManager({ tileLayers }: { tileLayers?: { [key: string]: TileLa
     return null;
 }
 
-export default function MapComponent({ onZoneDrawn, onZoneEdited, onZoneDeleted, selectedGeometry, mapCenter, tileLayers }: MapComponentProps) {
+import LayerControl from './dashboard/LayerControl';
+
+export default function MapComponent({
+    onZoneDrawn,
+    onZoneEdited,
+    onZoneDeleted,
+    selectedGeometry,
+    mapCenter,
+    tileLayers,
+    onToggleLayer,
+    onOpacityChange
+}: MapComponentProps) {
     const [yields, setYields] = useState<YieldRecord[]>([]);
 
     useEffect(() => {
@@ -259,6 +273,18 @@ export default function MapComponent({ onZoneDrawn, onZoneEdited, onZoneDeleted,
                     </Marker>
                 ))}
             </MapContainer>
+
+            {tileLayers && onToggleLayer && onOpacityChange && (
+                <LayerControl
+                    layers={{
+                        NDVI: tileLayers.NDVI ? { ...tileLayers.NDVI, name: 'NDVI', color: '' } : undefined,
+                        NDMI: tileLayers.NDMI ? { ...tileLayers.NDMI, name: 'NDMI', color: '' } : undefined,
+                        RECI: tileLayers.RECI ? { ...tileLayers.RECI, name: 'RECI', color: '' } : undefined,
+                    }}
+                    onToggleLayer={onToggleLayer}
+                    onOpacityChange={onOpacityChange}
+                />
+            )}
         </div>
     );
 }

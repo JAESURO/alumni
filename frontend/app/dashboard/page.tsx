@@ -33,10 +33,14 @@ export default function DashboardPage() {
 
     // Resolved State: Include both tileLayers (Local) and notifications (Remote)
     const [tileLayers, setTileLayers] = useState<{
-        NDVI?: { url: string; opacity: number };
-        NDMI?: { url: string; opacity: number };
-        RECI?: { url: string; opacity: number };
-    }>({});
+        NDVI?: { url: string; opacity: number; visible: boolean };
+        NDMI?: { url: string; opacity: number; visible: boolean };
+        RECI?: { url: string; opacity: number; visible: boolean };
+    }>({
+        NDVI: { url: '', opacity: 0.7, visible: false },
+        NDMI: { url: '', opacity: 0.7, visible: false },
+        RECI: { url: '', opacity: 0.7, visible: false }
+    });
     const [notifications, setNotifications] = useState<Notification[]>([]);
 
     useEffect(() => {
@@ -55,9 +59,32 @@ export default function DashboardPage() {
         if (drawnGeometry && formData.parameter) {
             fetchVisualization(formData.parameter);
         } else {
-            setTileLayers({});
+            // Do not clear layers on geometry change to keep UI stable, or reset if needed
+            // setTileLayers({});
         }
     }, [drawnGeometry, formData.parameter, formData.startDate, formData.endDate]);
+
+    const toggleLayer = (param: string) => {
+        setTileLayers(prev => {
+            const current = prev[param as keyof typeof prev];
+            if (!current) return prev;
+            return {
+                ...prev,
+                [param]: { ...current, visible: !current.visible }
+            };
+        });
+    };
+
+    const changeOpacity = (param: string, opacity: number) => {
+        setTileLayers(prev => {
+            const current = prev[param as keyof typeof prev];
+            if (!current) return prev;
+            return {
+                ...prev,
+                [param]: { ...current, opacity }
+            };
+        });
+    };
 
     // Resolved Logic: Include notification helpers (Remote)
     const addNotification = (notification: Omit<Notification, 'id' | 'timestamp' | 'dismissed'>) => {
@@ -364,12 +391,14 @@ export default function DashboardPage() {
             if (res.ok) {
                 const data = await res.json();
                 if (data.tile_url) {
-                    setTileLayers({
+                    setTileLayers(prev => ({
+                        ...prev,
                         [parameter]: {
                             url: data.tile_url,
-                            opacity: 0.7
+                            opacity: prev[parameter as keyof typeof prev]?.opacity || 0.7,
+                            visible: true
                         }
-                    });
+                    }));
                 }
             }
         } catch (error) {
@@ -499,6 +528,8 @@ export default function DashboardPage() {
                                     selectedGeometry={selectedGeometry}
                                     mapCenter={mapCenter}
                                     tileLayers={tileLayers}
+                                    onToggleLayer={toggleLayer}
+                                    onOpacityChange={changeOpacity}
                                 />
                             </div>
                         </div>
