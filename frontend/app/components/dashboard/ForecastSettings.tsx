@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, RefreshCw, X } from 'lucide-react';
+import { Search, RefreshCw, X, CloudRain } from 'lucide-react';
 
 interface ForecastSettingsProps {
     searchQuery: string;
@@ -19,6 +19,8 @@ interface ForecastSettingsProps {
     selectedRecordId: number | null;
     cancelEdit: () => void;
     message: string;
+    checkDataAvailability: () => void;
+    isCheckingAvailability: boolean;
 }
 
 export default function ForecastSettings({
@@ -33,7 +35,9 @@ export default function ForecastSettings({
     drawnGeometry,
     selectedRecordId,
     cancelEdit,
-    message
+    message,
+    checkDataAvailability,
+    isCheckingAvailability
 }: ForecastSettingsProps) {
     return (
         <div className="bg-white rounded-xl shadow-lg p-6">
@@ -112,14 +116,25 @@ export default function ForecastSettings({
                     </select>
                 </div>
 
-                <button
-                    onClick={runForecast}
-                    disabled={isForecasting || !drawnGeometry}
-                    className="w-full flex items-center justify-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed mt-4"
-                >
-                    <RefreshCw className={`w-5 h-5 ${isForecasting ? 'animate-spin' : ''}`} />
-                    <span>{isForecasting ? 'Processing...' : selectedRecordId ? 'Update Record' : 'Run Forecast'}</span>
-                </button>
+                <div className="flex space-x-2">
+                    <button
+                        onClick={checkDataAvailability}
+                        disabled={isCheckingAvailability || !drawnGeometry}
+                        className="flex-1 flex items-center justify-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-200 transition disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                    >
+                        <CloudRain className={`w-5 h-5 ${isCheckingAvailability ? 'animate-bounce' : ''}`} />
+                        <span>Check Availability</span>
+                    </button>
+
+                    <button
+                        onClick={runForecast}
+                        disabled={isForecasting || !drawnGeometry}
+                        className="flex-1 flex items-center justify-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                    >
+                        <RefreshCw className={`w-5 h-5 ${isForecasting ? 'animate-spin' : ''}`} />
+                        <span>{isForecasting ? 'Processing...' : selectedRecordId ? 'Run New Forecast' : 'Run Forecast'}</span>
+                    </button>
+                </div>
 
                 {selectedRecordId && (
                     <button
@@ -127,7 +142,7 @@ export default function ForecastSettings({
                         className="w-full flex items-center justify-center space-x-2 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition mt-2"
                     >
                         <X className="w-5 h-5" />
-                        <span>Cancel Edit</span>
+                        <span>Clear Selection</span>
                     </button>
                 )}
             </div>

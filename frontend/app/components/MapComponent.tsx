@@ -69,6 +69,17 @@ function SelectedGeometryLayer({ geometry }: { geometry: any }) {
                     fillOpacity: 0.2
                 },
                 pointToLayer: (feature, latlng) => {
+                    const radius = (feature.geometry as any).radius;
+                    if (radius) {
+                        return L.circle(latlng, {
+                            radius: radius,
+                            fillColor: '#3b82f6',
+                            color: '#1e40af',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.5
+                        });
+                    }
                     return L.circleMarker(latlng, {
                         radius: 8,
                         fillColor: '#3b82f6',

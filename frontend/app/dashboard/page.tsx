@@ -230,7 +230,6 @@ export default function DashboardPage() {
                 const data = await res.json();
                 if (data.error) {
                     setAvailabilityError(data.error);
-                    setDataAvailability(null);
                     setMessage(`Availability check failed: ${data.error}`);
                     addNotification({
                         type: 'error',
@@ -239,19 +238,23 @@ export default function DashboardPage() {
                         message: data.error
                     });
                 } else {
-                    setDataAvailability(data);
+                    const total = data.totalImages;
+                    const recentDates = data.recentDates ? data.recentDates.slice(0, 3).map((d: any) => d.date).join(', ') : '';
+
                     setMessage(`Found ${data.totalImages} satellite images for this area.`);
                     addNotification({
-                        type: 'success',
-                        category: 'activity',
-                        title: 'Satellite Data Available',
-                        message: `Found ${data.totalImages} images for the selected area and date range.`
+                        type: 'info',
+                        category: 'weather',
+                        title: 'Satellite Data Analysis',
+                        message: `Found ${total} images available for this area.\n` +
+                            `Clear dates found: ${recentDates || 'None in range'}.\n` +
+                            `Recommended: Proceed with forecast.`
                     });
                 }
+                setDataAvailability(null);
             } else {
                 const errorText = await res.text();
                 setAvailabilityError(`Failed to check availability: ${res.status} ${errorText}`);
-                setDataAvailability(null);
                 setMessage(`Availability check failed: ${res.status} ${errorText}`);
                 addNotification({
                     type: 'error',
@@ -262,7 +265,6 @@ export default function DashboardPage() {
             }
         } catch (error) {
             setAvailabilityError(`Error checking availability: ${String(error)}`);
-            setDataAvailability(null);
             setMessage(`Availability check error: ${String(error)}`);
             addNotification({
                 type: 'error',
@@ -320,10 +322,16 @@ export default function DashboardPage() {
 
     const handleRowClick = (record: YieldRecord) => {
         setSelectedRecordId(record.id);
+
+        const sDate = record.startDate ? (typeof record.startDate === 'string' ? record.startDate : String(record.startDate)) :
+            (typeof record.date === 'string' ? record.date : String(record.date));
+        const eDate = record.endDate ? (typeof record.endDate === 'string' ? record.endDate : String(record.endDate)) :
+            (typeof record.date === 'string' ? record.date : String(record.date));
+
         setFormData({
             location: record.location,
-            startDate: typeof record.date === 'string' ? record.date : String(record.date),
-            endDate: typeof record.date === 'string' ? record.date : String(record.date),
+            startDate: sDate,
+            endDate: eDate,
             parameter: record.parameter || 'NDVI'
         });
 
@@ -332,12 +340,12 @@ export default function DashboardPage() {
                 const geom = JSON.parse(record.geometryJson);
                 setSelectedGeometry(geom);
                 setDrawnGeometry(geom);
-                setMessage(`Editing record "${record.location}".`);
+                setMessage(`Loaded settings from "${record.location}". Run forecast to create a new entry.`);
                 addNotification({
                     type: 'info',
                     category: 'activity',
-                    title: 'Record Selected',
-                    message: `Editing "${record.location}".`
+                    title: 'Settings Loaded',
+                    message: `Loaded settings from "${record.location}".`
                 });
             } catch (e) {
             }
@@ -348,7 +356,7 @@ export default function DashboardPage() {
             };
             setSelectedGeometry(pointGeom);
             setDrawnGeometry(pointGeom);
-            setMessage(`Editing record "${record.location}" (Point only).`);
+            setMessage(`Loaded settings from "${record.location}" (Point).`);
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -436,7 +444,6 @@ export default function DashboardPage() {
 
         try {
             const payload = {
-                id: selectedRecordId,
                 location: formData.location || 'Custom Zone',
                 geometry: drawnGeometry,
                 date: formData.endDate,
@@ -511,7 +518,6 @@ export default function DashboardPage() {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-8">
-                    {/* Section 1: Satellite Map */}
                     <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border-2 border-green-200">
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="bg-green-600 p-2 rounded-lg">
@@ -548,7 +554,6 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* Section 2: Forecast Run Results */}
                     <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200">
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="bg-blue-600 p-2 rounded-lg">
@@ -571,15 +576,11 @@ export default function DashboardPage() {
                                 selectedRecordId={selectedRecordId}
                                 cancelEdit={cancelEdit}
                                 message={message}
+                                checkDataAvailability={() => checkDataAvailability(drawnGeometry)}
+                                isCheckingAvailability={isCheckingAvailability}
                             />
 
-                            <AvailabilityStatus
-                                drawnGeometry={drawnGeometry}
-                                isCheckingAvailability={isCheckingAvailability}
-                                availabilityError={availabilityError}
-                                dataAvailability={dataAvailability}
-                                checkDataAvailability={checkDataAvailability}
-                            />
+
 
                             <ForecastVisualization
                                 yieldData={yieldData}
@@ -595,7 +596,6 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* Section 3: Notifications & Alerts */}
                     <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border-2 border-yellow-200">
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="bg-yellow-600 p-2 rounded-lg">

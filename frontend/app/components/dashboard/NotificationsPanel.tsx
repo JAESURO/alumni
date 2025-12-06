@@ -153,7 +153,7 @@ export default function NotificationsPanel({
                                                     {formatTimestamp(notification.timestamp)}
                                                 </span>
                                             </div>
-                                            <p className={`text-sm ${colors.text}`}>
+                                            <p className={`text-sm ${colors.text} whitespace-pre-wrap`}>
                                                 {notification.message}
                                             </p>
                                         </div>
