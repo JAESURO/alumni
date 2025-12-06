@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import MapWrapper from '../components/MapWrapper';
-import { Sprout, LogOut } from 'lucide-react';
+import { Sprout, LogOut, Map, TrendingUp, Bell } from 'lucide-react';
 import Link from 'next/link';
 import { API_URL } from '../config/api';
 import { YieldRecord, DataAvailability } from '../types/dashboard';
 import ForecastSettings from '../components/dashboard/ForecastSettings';
 import AvailabilityStatus from '../components/dashboard/AvailabilityStatus';
 import ForecastResults from '../components/dashboard/ForecastResults';
+import ForecastVisualization from '../components/dashboard/ForecastVisualization';
 import NotificationsPanel, { Notification } from '../components/dashboard/NotificationsPanel';
 import LayerControl from '../components/dashboard/LayerControl';
 
@@ -510,69 +511,99 @@ export default function DashboardPage() {
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                            <h2 className="text-2xl font-bold text-gray-900">Satellite Map</h2>
-                            <div className="bg-white rounded-xl shadow-lg p-1 h-[600px]">
-                                <MapWrapper
-                                    onZoneDrawn={handleZoneDrawn}
-                                    onZoneEdited={handleZoneEdited}
-                                    onZoneDeleted={handleZoneDeleted}
-                                    selectedGeometry={selectedGeometry}
-                                    mapCenter={mapCenter}
-                                    tileLayers={tileLayers}
-                                />
+                    {/* Section 1: Satellite Map */}
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border-2 border-green-200">
+                        <div className="flex items-center space-x-3 mb-6">
+                            <div className="bg-green-600 p-2 rounded-lg">
+                                <Map className="w-6 h-6 text-white" />
                             </div>
-
-                            <LayerControl
-                                layers={{
-                                    NDVI: tileLayers.NDVI ? { ...tileLayers.NDVI, name: 'NDVI', color: '' } : undefined,
-                                    NDMI: tileLayers.NDMI ? { ...tileLayers.NDMI, name: 'NDMI', color: '' } : undefined,
-                                    RECI: tileLayers.RECI ? { ...tileLayers.RECI, name: 'RECI', color: '' } : undefined,
-                                }}
-                                onToggleLayer={toggleLayer}
-                                onOpacityChange={changeOpacity}
-                            />
+                            <h2 className="text-2xl font-bold text-gray-900">Satellite Map</h2>
                         </div>
 
-                        <div className="space-y-4">
-                            <h2 className="text-2xl font-bold text-gray-900">Forecast Configuration & Results</h2>
-                            <div className="space-y-6">
-                                <ForecastSettings
-                                    searchQuery={searchQuery}
-                                    setSearchQuery={setSearchQuery}
-                                    handleSearch={handleSearch}
-                                    isSearching={isSearching}
-                                    formData={formData}
-                                    setFormData={setFormData}
-                                    runForecast={runForecast}
-                                    isForecasting={isForecasting}
-                                    drawnGeometry={drawnGeometry}
-                                    selectedRecordId={selectedRecordId}
-                                    cancelEdit={cancelEdit}
-                                    message={message}
-                                />
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2 space-y-4">
+                                <div className="bg-white rounded-xl shadow-lg p-1 h-[600px]">
+                                    <MapWrapper
+                                        onZoneDrawn={handleZoneDrawn}
+                                        onZoneEdited={handleZoneEdited}
+                                        onZoneDeleted={handleZoneDeleted}
+                                        selectedGeometry={selectedGeometry}
+                                        mapCenter={mapCenter}
+                                        tileLayers={tileLayers}
+                                    />
+                                </div>
+                            </div>
 
-                                <AvailabilityStatus
-                                    drawnGeometry={drawnGeometry}
-                                    isCheckingAvailability={isCheckingAvailability}
-                                    availabilityError={availabilityError}
-                                    dataAvailability={dataAvailability}
-                                    checkDataAvailability={checkDataAvailability}
-                                />
-
-                                <ForecastResults
-                                    yieldData={yieldData}
-                                    fetchYieldData={fetchYieldData}
-                                    handleRowClick={handleRowClick}
-                                    setMessage={setMessage}
+                            <div className="space-y-4">
+                                <LayerControl
+                                    layers={{
+                                        NDVI: tileLayers.NDVI ? { ...tileLayers.NDVI, name: 'NDVI', color: '' } : undefined,
+                                        NDMI: tileLayers.NDMI ? { ...tileLayers.NDMI, name: 'NDMI', color: '' } : undefined,
+                                        RECI: tileLayers.RECI ? { ...tileLayers.RECI, name: 'RECI', color: '' } : undefined,
+                                    }}
+                                    onToggleLayer={toggleLayer}
+                                    onOpacityChange={changeOpacity}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Alerts & Activity</h2>
+                    {/* Section 2: Forecast Run Results */}
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200">
+                        <div className="flex items-center space-x-3 mb-6">
+                            <div className="bg-blue-600 p-2 rounded-lg">
+                                <TrendingUp className="w-6 h-6 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900">Forecast Run Results</h2>
+                        </div>
+
+                        <div className="space-y-6">
+                            <ForecastSettings
+                                searchQuery={searchQuery}
+                                setSearchQuery={setSearchQuery}
+                                handleSearch={handleSearch}
+                                isSearching={isSearching}
+                                formData={formData}
+                                setFormData={setFormData}
+                                runForecast={runForecast}
+                                isForecasting={isForecasting}
+                                drawnGeometry={drawnGeometry}
+                                selectedRecordId={selectedRecordId}
+                                cancelEdit={cancelEdit}
+                                message={message}
+                            />
+
+                            <AvailabilityStatus
+                                drawnGeometry={drawnGeometry}
+                                isCheckingAvailability={isCheckingAvailability}
+                                availabilityError={availabilityError}
+                                dataAvailability={dataAvailability}
+                                checkDataAvailability={checkDataAvailability}
+                            />
+
+                            <ForecastVisualization
+                                yieldData={yieldData}
+                                selectedParameter={formData.parameter}
+                            />
+
+                            <ForecastResults
+                                yieldData={yieldData}
+                                fetchYieldData={fetchYieldData}
+                                handleRowClick={handleRowClick}
+                                setMessage={setMessage}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Section 3: Notifications & Alerts */}
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border-2 border-yellow-200">
+                        <div className="flex items-center space-x-3 mb-6">
+                            <div className="bg-yellow-600 p-2 rounded-lg">
+                                <Bell className="w-6 h-6 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900">Notifications & Alerts</h2>
+                        </div>
+
                         <NotificationsPanel
                             notifications={notifications}
                             onDismiss={dismissNotification}
