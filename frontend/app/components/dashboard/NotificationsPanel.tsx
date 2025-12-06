@@ -109,15 +109,14 @@ export default function NotificationsPanel({
                 )}
             </div>
 
-            {/* Filter Tabs */}
             <div className="flex space-x-2 mb-4 overflow-x-auto">
                 {['all', 'system', 'crop', 'weather', 'activity'].map((f) => (
                     <button
                         key={f}
                         onClick={() => setFilter(f as any)}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap ${filter === f
-                                ? 'bg-green-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            ? 'bg-green-600 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                     >
                         {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -125,7 +124,6 @@ export default function NotificationsPanel({
                 ))}
             </div>
 
-            {/* Notifications List */}
             <div className="space-y-3 max-h-96 overflow-y-auto">
                 {filteredNotifications.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">

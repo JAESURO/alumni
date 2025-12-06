@@ -13,18 +13,14 @@ export default function MapWrapper({
     onZoneDeleted,
     selectedGeometry,
     mapCenter,
-    tileLayers,
-    onToggleLayer,
-    onOpacityChange
+    tileLayers
 }: {
     onZoneDrawn?: (geometry: any) => void,
     onZoneEdited?: (geometry: any) => void,
     onZoneDeleted?: () => void,
     selectedGeometry?: any,
     mapCenter?: [number, number],
-    tileLayers?: any,
-    onToggleLayer?: (parameter: string) => void,
-    onOpacityChange?: (parameter: string, opacity: number) => void
+    tileLayers?: any
 }) {
     return <MapComponent
         onZoneDrawn={onZoneDrawn}
@@ -33,7 +29,5 @@ export default function MapWrapper({
         selectedGeometry={selectedGeometry}
         mapCenter={mapCenter}
         tileLayers={tileLayers}
-        onToggleLayer={onToggleLayer}
-        onOpacityChange={onOpacityChange}
     />;
 }

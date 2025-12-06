@@ -1,12 +1,11 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, FeatureGroup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, FeatureGroup, useMap } from 'react-leaflet';
 import { EditControl } from 'react-leaflet-draw';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { API_URL } from '../config/api';
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -25,16 +24,7 @@ function MapController({ center }: { center?: [number, number] }) {
     return null;
 }
 
-interface YieldRecord {
-    id: number;
-    location: string;
-    date: string;
-    prediction: number;
-    indexValue?: number;
-    parameter?: string;
-    latitude: number;
-    longitude: number;
-}
+
 
 interface TileLayerData {
     url: string;
@@ -53,8 +43,6 @@ interface MapComponentProps {
         NDMI?: TileLayerData;
         RECI?: TileLayerData;
     };
-    onToggleLayer?: (parameter: string) => void;
-    onOpacityChange?: (parameter: string, opacity: number) => void;
 }
 
 function SelectedGeometryLayer({ geometry }: { geometry: any }) {
@@ -159,7 +147,7 @@ function TileLayerManager({ tileLayers }: { tileLayers?: { [key: string]: TileLa
     return null;
 }
 
-import LayerControl from './dashboard/LayerControl';
+
 
 export default function MapComponent({
     onZoneDrawn,
@@ -167,27 +155,8 @@ export default function MapComponent({
     onZoneDeleted,
     selectedGeometry,
     mapCenter,
-    tileLayers,
-    onToggleLayer,
-    onOpacityChange
+    tileLayers
 }: MapComponentProps) {
-    const [yields, setYields] = useState<YieldRecord[]>([]);
-
-    useEffect(() => {
-        fetch(`${API_URL}/api/yields`)
-            .then(res => res.text())
-            .then(text => {
-                try {
-                    const data = JSON.parse(text);
-                    setYields(Array.isArray(data) ? data : []);
-                } catch (e) {
-                    setYields([]);
-                }
-            })
-            .catch(() => {
-                setYields([]);
-            });
-    }, []);
 
     const handleCreated = (e: any) => {
         const layer = e.layer;
@@ -260,31 +229,10 @@ export default function MapComponent({
                         }}
                     />
                 </FeatureGroup>
-                {yields.map((record: YieldRecord) => (
-                    <Marker key={record.id} position={[record.latitude, record.longitude]}>
-                        <Popup>
-                            <div>
-                                <strong>{record.location}</strong><br />
-                                Parameter: {record.parameter || 'NDVI'}<br />
-                                Index: {(record.indexValue ?? record.prediction)?.toFixed(4)}<br />
-                                Date: {record.date}
-                            </div>
-                        </Popup>
-                    </Marker>
-                ))}
+
             </MapContainer>
 
-            {tileLayers && onToggleLayer && onOpacityChange && (
-                <LayerControl
-                    layers={{
-                        NDVI: tileLayers.NDVI ? { ...tileLayers.NDVI, name: 'NDVI', color: '' } : undefined,
-                        NDMI: tileLayers.NDMI ? { ...tileLayers.NDMI, name: 'NDMI', color: '' } : undefined,
-                        RECI: tileLayers.RECI ? { ...tileLayers.RECI, name: 'RECI', color: '' } : undefined,
-                    }}
-                    onToggleLayer={onToggleLayer}
-                    onOpacityChange={onOpacityChange}
-                />
-            )}
+
         </div>
     );
 }

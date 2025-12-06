@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/yields")
@@ -34,20 +33,15 @@ public class YieldRecordController {
         logger.info("=== GET /api/yields REQUEST RECEIVED ===");
         Long userId = (Long) session.getAttribute("userId");
 
-        List<YieldRecord> records;
         if (userId == null) {
-            logger.info("No userId in session - returning all records");
-            records = repository.findAll();
-        } else {
-            logger.info("userId in session: {} - returning user-specific records", userId);
-            records = repository.findByUserIdOrderByDateDesc(userId);
+            logger.warn("No userId in session - unauthorized access attempt");
+            return ResponseEntity.status(401).body(Map.of("error", "Unauthorized"));
         }
 
+        logger.info("userId in session: {} - returning user-specific records", userId);
+        List<YieldRecord> records = repository.findByUserIdOrderByDateDesc(userId);
+
         logger.info("Found {} yield records", records.size());
-        for (YieldRecord record : records) {
-            logger.info("  - ID: {}, Location: {}, Parameter: {}", record.getId(), record.getLocation(),
-                    record.getParameter());
-        }
         return ResponseEntity.ok(records);
     }
 

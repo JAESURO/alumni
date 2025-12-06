@@ -10,6 +10,7 @@ import ForecastSettings from '../components/dashboard/ForecastSettings';
 import AvailabilityStatus from '../components/dashboard/AvailabilityStatus';
 import ForecastResults from '../components/dashboard/ForecastResults';
 import NotificationsPanel, { Notification } from '../components/dashboard/NotificationsPanel';
+import LayerControl from '../components/dashboard/LayerControl';
 
 export default function DashboardPage() {
     const [isForecasting, setIsForecasting] = useState(false);
@@ -19,7 +20,7 @@ export default function DashboardPage() {
     const [yieldData, setYieldData] = useState<YieldRecord[]>([]);
     const [formData, setFormData] = useState({
         location: '',
-        startDate: new Date().toISOString().split('T')[0],
+        startDate: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0],
         endDate: new Date().toISOString().split('T')[0],
         parameter: 'NDVI'
     });
@@ -31,7 +32,7 @@ export default function DashboardPage() {
     const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
     const [availabilityError, setAvailabilityError] = useState<string | null>(null);
 
-    // Resolved State: Include both tileLayers (Local) and notifications (Remote)
+
     const [tileLayers, setTileLayers] = useState<{
         NDVI?: { url: string; opacity: number; visible: boolean };
         NDMI?: { url: string; opacity: number; visible: boolean };
@@ -45,7 +46,6 @@ export default function DashboardPage() {
 
     useEffect(() => {
         fetchYieldData();
-        // Add welcome notification
         addNotification({
             type: 'info',
             category: 'system',
@@ -54,13 +54,10 @@ export default function DashboardPage() {
         });
     }, []);
 
-    // Resolved Logic: Include visualization effect (Local)
     useEffect(() => {
         if (drawnGeometry && formData.parameter) {
             fetchVisualization(formData.parameter);
         } else {
-            // Do not clear layers on geometry change to keep UI stable, or reset if needed
-            // setTileLayers({});
         }
     }, [drawnGeometry, formData.parameter, formData.startDate, formData.endDate]);
 
@@ -86,7 +83,6 @@ export default function DashboardPage() {
         });
     };
 
-    // Resolved Logic: Include notification helpers (Remote)
     const addNotification = (notification: Omit<Notification, 'id' | 'timestamp' | 'dismissed'>) => {
         const newNotification: Notification = {
             ...notification,
@@ -361,7 +357,7 @@ export default function DashboardPage() {
         setSelectedRecordId(null);
         setFormData({
             location: '',
-            startDate: new Date().toISOString().split('T')[0],
+            startDate: new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0],
             endDate: new Date().toISOString().split('T')[0],
             parameter: 'NDVI'
         });
@@ -513,11 +509,8 @@ export default function DashboardPage() {
             </nav>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Resolved Layout: Use Remote's Three-Section Layout but include tileLayers in MapWrapper */}
                 <div className="space-y-8">
-                    {/* Top Row: Map + Settings/Results */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Section 1: Satellite Map */}
                         <div className="space-y-4">
                             <h2 className="text-2xl font-bold text-gray-900">Satellite Map</h2>
                             <div className="bg-white rounded-xl shadow-lg p-1 h-[600px]">
@@ -528,13 +521,20 @@ export default function DashboardPage() {
                                     selectedGeometry={selectedGeometry}
                                     mapCenter={mapCenter}
                                     tileLayers={tileLayers}
-                                    onToggleLayer={toggleLayer}
-                                    onOpacityChange={changeOpacity}
                                 />
                             </div>
+
+                            <LayerControl
+                                layers={{
+                                    NDVI: tileLayers.NDVI ? { ...tileLayers.NDVI, name: 'NDVI', color: '' } : undefined,
+                                    NDMI: tileLayers.NDMI ? { ...tileLayers.NDMI, name: 'NDMI', color: '' } : undefined,
+                                    RECI: tileLayers.RECI ? { ...tileLayers.RECI, name: 'RECI', color: '' } : undefined,
+                                }}
+                                onToggleLayer={toggleLayer}
+                                onOpacityChange={changeOpacity}
+                            />
                         </div>
 
-                        {/* Section 2: Forecast Settings & Results */}
                         <div className="space-y-4">
                             <h2 className="text-2xl font-bold text-gray-900">Forecast Configuration & Results</h2>
                             <div className="space-y-6">
@@ -571,7 +571,6 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    {/* Section 3: Notifications & Alerts */}
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">Alerts & Activity</h2>
                         <NotificationsPanel

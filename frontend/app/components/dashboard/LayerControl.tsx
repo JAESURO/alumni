@@ -40,7 +40,7 @@ export default function LayerControl({ layers, onToggleLayer, onOpacityChange }:
     };
 
     return (
-        <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 z-[1000] w-64">
+        <div className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 p-4">
             <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-white">Map Layers</h3>
 
             <div className="space-y-4">

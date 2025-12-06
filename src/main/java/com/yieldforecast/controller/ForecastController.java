@@ -28,6 +28,10 @@ public class ForecastController {
         logger.info("Received /run request.");
 
         Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            logger.warn("Unauthorized forecast attempt");
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
         CompletableFuture.runAsync(() -> {
             try {
                 forecastService.processForecast(payload, userId);
