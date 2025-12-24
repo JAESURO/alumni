@@ -23,7 +23,8 @@ export default function LandingPage() {
             <div className="flex items-center space-x-2">
               <Sprout className="w-8 h-8 text-green-600" />
               <span className="text-2xl font-bold text-gray-900">
-                YieldForecast
+                AgroTrack
+
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
@@ -327,7 +328,8 @@ export default function LandingPage() {
               <div className="flex items-center space-x-2 mb-4">
                 <Sprout className="w-6 h-6 text-green-500" />
                 <span className="text-xl font-bold text-white">
-                  YieldForecast
+                  AgroTrack
+
                 </span>
               </div>
               <p className="text-sm text-gray-400">
@@ -396,7 +398,8 @@ export default function LandingPage() {
 
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
             <p>
-              © 2025 YieldForecast. All rights reserved. Built with 🌾 for
+              © 2025 AgroTrack. All rights reserved. Built with 🌾 for
+
               farmers.
             </p>
           </div>

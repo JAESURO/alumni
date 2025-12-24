@@ -54,7 +54,8 @@ export default function RegisterPage() {
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-green-800 mb-2">
-                        🌾 YieldForecast
+                        🌾 AgroTrack
+
                     </h1>
                     <p className="text-gray-600">Join the Agricultural Revolution</p>
                 </div>

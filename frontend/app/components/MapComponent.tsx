@@ -1,30 +1,16 @@
 'use client';
 
-import { MapContainer, TileLayer, FeatureGroup, useMap } from 'react-leaflet';
-import { EditControl } from 'react-leaflet-draw';
-import 'leaflet/dist/leaflet.css';
-import 'leaflet-draw/dist/leaflet.draw.css';
-import { useEffect, useRef } from 'react';
-import L from 'leaflet';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import {
+    APIProvider,
+    Map,
+    useMap,
+    useMapsLibrary,
+    ControlPosition,
+    MapControl
+} from '@vis.gl/react-google-maps';
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-function MapController({ center }: { center?: [number, number] }) {
-    const map = useMap();
-    useEffect(() => {
-        if (center) {
-            map.flyTo(center, 13);
-        }
-    }, [center, map]);
-    return null;
-}
-
-
+const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
 interface TileLayerData {
     url: string;
@@ -45,120 +31,314 @@ interface MapComponentProps {
     };
 }
 
-function SelectedGeometryLayer({ geometry }: { geometry: any }) {
+function DrawingManager({
+    onZoneDrawn,
+    onZoneEdited,
+    onZoneDeleted
+}: {
+    onZoneDrawn?: (geometry: any) => void;
+    onZoneEdited?: (geometry: any) => void;
+    onZoneDeleted?: () => void;
+}) {
     const map = useMap();
-    const layerRef = useRef<L.GeoJSON | null>(null);
+    const drawing = useMapsLibrary('drawing');
+    const [drawingManager, setDrawingManager] = useState<google.maps.drawing.DrawingManager | null>(null);
+    const overlayRef = useRef<any>(null);
+
+    const clearOverlay = useCallback(() => {
+        if (overlayRef.current) {
+            overlayRef.current.setMap(null);
+            overlayRef.current = null;
+        }
+    }, []);
 
     useEffect(() => {
-        if (geometry) {
-            if (layerRef.current) {
-                map.removeLayer(layerRef.current);
+        if (!map || !drawing) return;
+
+        const manager = new drawing.DrawingManager({
+            drawingMode: google.maps.drawing.OverlayType.POLYGON,
+            drawingControl: true,
+            drawingControlOptions: {
+                position: google.maps.ControlPosition.TOP_CENTER,
+                drawingModes: [
+                    google.maps.drawing.OverlayType.POLYGON,
+                    google.maps.drawing.OverlayType.RECTANGLE,
+                    google.maps.drawing.OverlayType.CIRCLE,
+                ],
+            },
+            polygonOptions: {
+                editable: true,
+                draggable: true,
+                fillColor: '#3b82f6',
+                strokeColor: '#1e40af',
+                fillOpacity: 0.2,
+                strokeWeight: 2,
+            },
+            rectangleOptions: {
+                editable: true,
+                draggable: true,
+                fillColor: '#3b82f6',
+                strokeColor: '#1e40af',
+                fillOpacity: 0.2,
+                strokeWeight: 2,
+            },
+            circleOptions: {
+                editable: true,
+                draggable: true,
+                fillColor: '#3b82f6',
+                strokeColor: '#1e40af',
+                fillOpacity: 0.2,
+                strokeWeight: 2,
+            }
+        });
+
+        manager.setMap(map);
+        setDrawingManager(manager);
+
+        return () => {
+            manager.setMap(null);
+        };
+    }, [map, drawing]);
+
+    useEffect(() => {
+        if (!drawingManager) return;
+
+        const convertOverlayToGeoJSON = (overlay: any, type: string) => {
+            let geometry: any = null;
+
+            if (type === 'polygon' || type === 'rectangle') {
+                const path = type === 'rectangle' ? overlay.getBounds() : overlay.getPath();
+                let coordinates = [];
+
+                if (type === 'rectangle') {
+                    const ne = path.getNorthEast();
+                    const sw = path.getSouthWest();
+                    coordinates = [[
+                        [sw.lng(), sw.lat()],
+                        [sw.lng(), ne.lat()],
+                        [ne.lng(), ne.lat()],
+                        [ne.lng(), sw.lat()],
+                        [sw.lng(), sw.lat()]
+                    ]];
+                } else {
+                    const latLngs = path.getArray();
+                    const ring = latLngs.map((ll: any) => [ll.lng(), ll.lat()]);
+                    if (ring.length > 0) {
+                        ring.push(ring[0]);
+                    }
+                    coordinates = [ring];
+                }
+
+                geometry = {
+                    type: 'Polygon',
+                    coordinates: coordinates
+                };
+            } else if (type === 'circle') {
+                const center = overlay.getCenter();
+                const radius = overlay.getRadius();
+                geometry = {
+                    type: 'Point',
+                    coordinates: [center.lng(), center.lat()],
+                    radius: radius
+                };
+            }
+            return geometry;
+        };
+
+        const handleOverlayComplete = (e: google.maps.drawing.OverlayCompleteEvent) => {
+            clearOverlay();
+
+            const overlay = e.overlay;
+            overlayRef.current = overlay;
+            drawingManager.setDrawingMode(null);
+
+            if (onZoneDrawn) {
+                const type = e.type;
+                const geometry = convertOverlayToGeoJSON(overlay, type as string);
+                if (geometry) onZoneDrawn(geometry);
             }
 
-            const feature = {
-                type: 'Feature' as const,
-                geometry: geometry,
-                properties: {}
-            };
+            const EVENTS = ['bounds_changed', 'radius_changed', 'center_changed', 'mouseup'];
 
-            const geoJsonLayer = L.geoJSON(feature, {
-                style: {
-                    color: '#3b82f6',
-                    weight: 3,
-                    opacity: 0.8,
-                    fillOpacity: 0.2
-                },
-                pointToLayer: (feature, latlng) => {
-                    const radius = (feature.geometry as any).radius;
-                    if (radius) {
-                        return L.circle(latlng, {
-                            radius: radius,
-                            fillColor: '#3b82f6',
-                            color: '#1e40af',
-                            weight: 2,
-                            opacity: 1,
-                            fillOpacity: 0.5
-                        });
+
+
+
+            if (e.type === 'circle') {
+                const circle = overlay as google.maps.Circle;
+                google.maps.event.addListener(circle, 'radius_changed', () => {
+                    const geometry = convertOverlayToGeoJSON(circle, 'circle');
+                    if (onZoneEdited) onZoneEdited(geometry);
+                });
+                google.maps.event.addListener(circle, 'center_changed', () => {
+                    const geometry = convertOverlayToGeoJSON(circle, 'circle');
+                    if (onZoneEdited) onZoneEdited(geometry);
+                });
+            } else if (e.type === 'polygon') {
+                const polygon = overlay as google.maps.Polygon;
+                google.maps.event.addListener(polygon.getPath(), 'set_at', () => {
+                    const geometry = convertOverlayToGeoJSON(polygon, 'polygon');
+                    if (onZoneEdited) onZoneEdited(geometry);
+                });
+                google.maps.event.addListener(polygon.getPath(), 'insert_at', () => {
+                    const geometry = convertOverlayToGeoJSON(polygon, 'polygon');
+                    if (onZoneEdited) onZoneEdited(geometry);
+                });
+                google.maps.event.addListener(polygon.getPath(), 'remove_at', () => {
+                    const geometry = convertOverlayToGeoJSON(polygon, 'polygon');
+                    if (onZoneEdited) onZoneEdited(geometry);
+                });
+            } else if (e.type === 'rectangle') {
+                const rectangle = overlay as google.maps.Rectangle;
+                google.maps.event.addListener(rectangle, 'bounds_changed', () => {
+                    const geometry = convertOverlayToGeoJSON(rectangle, 'rectangle');
+                    if (onZoneEdited) onZoneEdited(geometry);
+                });
+            }
+        };
+
+        const listener = google.maps.event.addListener(drawingManager, 'overlaycomplete', handleOverlayComplete);
+
+        return () => {
+            google.maps.event.removeListener(listener);
+        };
+
+    }, [drawingManager, onZoneDrawn, onZoneEdited, clearOverlay]);
+
+    return null;
+}
+
+function TileLayerOverlay({ tileLayers }: { tileLayers?: { [key: string]: TileLayerData } }) {
+    const map = useMap();
+    const layersRef = useRef<{ [key: string]: { instance: google.maps.ImageMapType, url: string } }>({});
+
+
+    useEffect(() => {
+        if (!map || !tileLayers) return;
+
+        Object.entries(tileLayers).forEach(([key, data]) => {
+            if (data && data.url && data.visible) {
+                const existing = layersRef.current[key];
+
+                if (!existing || existing.url !== data.url) {
+                    if (existing) {
+
+                        const index = map.overlayMapTypes.getArray().indexOf(existing.instance);
+                        if (index > -1) {
+                            map.overlayMapTypes.removeAt(index);
+                        }
                     }
-                    return L.circleMarker(latlng, {
-                        radius: 8,
-                        fillColor: '#3b82f6',
-                        color: '#1e40af',
-                        weight: 2,
-                        opacity: 1,
-                        fillOpacity: 0.5
+
+                    const imageMapType = new google.maps.ImageMapType({
+                        getTileUrl: (coord, zoom) => {
+                            let url = data.url;
+                            url = url.replace('{z}', zoom.toString());
+                            url = url.replace('{x}', coord.x.toString());
+                            url = url.replace('{y}', coord.y.toString());
+                            return url;
+                        },
+                        tileSize: new google.maps.Size(256, 256),
+                        opacity: data.opacity,
+                        name: key
                     });
+
+                    map.overlayMapTypes.push(imageMapType);
+                    layersRef.current[key] = { instance: imageMapType, url: data.url };
+                } else {
+                    existing.instance.setOpacity(data.opacity);
                 }
-            });
+            } else {
 
-            geoJsonLayer.addTo(map);
-            layerRef.current = geoJsonLayer;
+                if (layersRef.current[key]) {
 
-            const bounds = geoJsonLayer.getBounds();
-            if (bounds.isValid()) {
-                map.fitBounds(bounds, { padding: [50, 50] });
+                    const existing = layersRef.current[key];
+                    const index = map.overlayMapTypes.getArray().indexOf(existing.instance);
+                    if (index > -1) {
+                        map.overlayMapTypes.removeAt(index);
+                    }
+                    delete layersRef.current[key];
+                }
+            }
+        });
+
+
+        const currentKeys = Object.keys(layersRef.current);
+        const newKeys = Object.keys(tileLayers || {});
+
+        currentKeys.forEach(key => {
+            if (!newKeys.includes(key)) {
+                const existing = layersRef.current[key];
+                const index = map.overlayMapTypes.getArray().indexOf(existing.instance);
+                if (index > -1) {
+                    map.overlayMapTypes.removeAt(index);
+                }
+                delete layersRef.current[key];
+            }
+        });
+
+    }, [map, tileLayers]);
+
+    return null;
+}
+
+function SelectedGeometry({ geometry }: { geometry: any }) {
+    const map = useMap();
+    const overlayRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (!map) return;
+
+
+        if (overlayRef.current) {
+            overlayRef.current.setMap(null);
+            overlayRef.current = null;
+        }
+
+        if (geometry) {
+            if (geometry.type === 'Point' && geometry.radius) {
+
+                const circle = new google.maps.Circle({
+                    strokeColor: '#3b82f6',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#3b82f6',
+                    fillOpacity: 0.2,
+                    map: map,
+                    center: { lat: geometry.coordinates[1], lng: geometry.coordinates[0] },
+                    radius: geometry.radius
+                });
+                overlayRef.current = circle;
+                const bounds = circle.getBounds();
+                if (bounds) map.fitBounds(bounds);
+
+            } else if (geometry.type === 'Polygon') {
+                const paths = geometry.coordinates[0].map((coord: number[]) => ({ lat: coord[1], lng: coord[0] }));
+                const polygon = new google.maps.Polygon({
+                    paths: paths,
+                    strokeColor: '#3b82f6',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#3b82f6',
+                    fillOpacity: 0.2,
+                    map: map
+                });
+                overlayRef.current = polygon;
+
+                const bounds = new google.maps.LatLngBounds();
+                paths.forEach((p: any) => bounds.extend(p));
+                map.fitBounds(bounds);
             }
         }
 
         return () => {
-            if (layerRef.current) {
-                map.removeLayer(layerRef.current);
-                layerRef.current = null;
+            if (overlayRef.current) {
+                overlayRef.current.setMap(null);
             }
         };
-    }, [geometry, map]);
+
+    }, [map, geometry]);
 
     return null;
 }
-
-function TileLayerManager({ tileLayers }: { tileLayers?: { [key: string]: TileLayerData } }) {
-    const map = useMap();
-    const layersRef = useRef<{ [key: string]: L.TileLayer }>({});
-
-    useEffect(() => {
-        if (!tileLayers) return;
-
-        Object.entries(tileLayers).forEach(([key, data]) => {
-            if (data && data.url && data.visible) {
-                if (layersRef.current[key]) {
-                    layersRef.current[key].setOpacity(data.opacity);
-                } else {
-                    const tileLayer = L.tileLayer(data.url, {
-                        opacity: data.opacity,
-                        attribution: 'Google Earth Engine'
-                    });
-                    tileLayer.addTo(map);
-                    layersRef.current[key] = tileLayer;
-                }
-            } else if (layersRef.current[key]) {
-                map.removeLayer(layersRef.current[key]);
-                delete layersRef.current[key];
-            }
-        });
-
-        const currentKeys = Object.keys(layersRef.current);
-        const newKeys = Object.keys(tileLayers || {});
-        const removedKeys = currentKeys.filter(k => !newKeys.includes(k));
-
-        removedKeys.forEach(key => {
-            if (layersRef.current[key]) {
-                map.removeLayer(layersRef.current[key]);
-                delete layersRef.current[key];
-            }
-        });
-
-        return () => {
-            Object.values(layersRef.current).forEach(layer => {
-                map.removeLayer(layer);
-            });
-            layersRef.current = {};
-        };
-    }, [tileLayers, map]);
-
-    return null;
-}
-
-
 
 export default function MapComponent({
     onZoneDrawn,
@@ -168,82 +348,36 @@ export default function MapComponent({
     mapCenter,
     tileLayers
 }: MapComponentProps) {
+    if (!API_KEY) {
+        return <div className="h-full w-full flex items-center justify-center bg-gray-100 text-red-500">Missing Google Maps API Key</div>;
+    }
 
-    const handleCreated = (e: any) => {
-        const layer = e.layer;
-        const geoJSON = layer.toGeoJSON();
-        let geometry = geoJSON.geometry;
-
-        if (e.layerType === 'circle') {
-            const radius = layer.getRadius();
-            geometry = { ...geometry, radius: radius };
-        }
-
-        if (onZoneDrawn) {
-            onZoneDrawn(geometry);
-        }
-    };
-
-    const handleEdited = (e: any) => {
-        const layers = e.layers;
-        layers.eachLayer((layer: any) => {
-            const geoJSON = layer.toGeoJSON();
-            let geometry = geoJSON.geometry;
-            if (layer instanceof L.Circle) {
-                const radius = layer.getRadius();
-                geometry = { ...geometry, radius: radius };
-            }
-            if (onZoneEdited) {
-                onZoneEdited(geometry);
-            }
-        });
-    };
-
-    const handleDeleted = (e: any) => {
-        if (onZoneDeleted) {
-            onZoneDeleted();
-        }
-    };
+    const defaultCenter = { lat: 51.505, lng: -0.09 };
+    const center = mapCenter ? { lat: mapCenter[0], lng: mapCenter[1] } : defaultCenter;
 
     return (
-        <div className="h-full w-full rounded-lg overflow-hidden">
-            <MapContainer
-                center={[51.505, -0.09]}
-                zoom={6}
-                style={{ height: '100%', width: '100%' }}
-                scrollWheelZoom={true}
-            >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-                <MapController center={mapCenter} />
-                <TileLayerManager tileLayers={tileLayers} />
-                <SelectedGeometryLayer geometry={selectedGeometry} />
-                <FeatureGroup>
-                    <EditControl
-                        position="topright"
-                        onCreated={handleCreated}
-                        onEdited={handleEdited}
-                        onDeleted={handleDeleted}
-                        draw={{
-                            rectangle: true,
-                            polygon: true,
-                            circle: true,
-                            circlemarker: false,
-                            marker: false,
-                            polyline: false,
-                        }}
-                        edit={{
-                            edit: true,
-                            remove: true,
-                        }}
+        <APIProvider apiKey={API_KEY}>
+            <div className="h-full w-full rounded-lg overflow-hidden relative">
+                <Map
+                    defaultCenter={defaultCenter}
+                    defaultZoom={6}
+                    center={mapCenter ? center : undefined}
+                    mapTypeId={'satellite'}
+                    style={{ width: '100%', height: '100%' }}
+                    disableDefaultUI={false}
+                    zoomControl={true}
+                    mapTypeControl={true}
+                    streetViewControl={false}
+                >
+                    <DrawingManager
+                        onZoneDrawn={onZoneDrawn}
+                        onZoneEdited={onZoneEdited}
+                        onZoneDeleted={onZoneDeleted}
                     />
-                </FeatureGroup>
-
-            </MapContainer>
-
-
-        </div>
+                    <TileLayerOverlay tileLayers={tileLayers} />
+                    <SelectedGeometry geometry={selectedGeometry} />
+                </Map>
+            </div>
+        </APIProvider>
     );
 }

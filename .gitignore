@@ -1,6 +1,6 @@
-target/
-frontend/node_modules/
-frontend/.next/
 .env
 frontend/.env.local
+frontend/.next/
+frontend/node_modules/
+target/
 yield_forecast.db
