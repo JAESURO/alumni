@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
-export default function HeroSection() {
+export default function HeroSection({ onLearnMoreClick }: { onLearnMoreClick?: () => void }) {
     return (
         <section className="pt-32 pb-20 px-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
             <div className="max-w-7xl mx-auto">
@@ -26,7 +26,7 @@ export default function HeroSection() {
                             <ArrowRight className="ml-2 w-5 h-5" />
                         </Link>
                         <button
-                            onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+                            onClick={onLearnMoreClick}
                             className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg font-semibold hover:bg-green-50 transition inline-flex items-center justify-center"
                         >
                             Learn More

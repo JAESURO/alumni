@@ -18,7 +18,7 @@ export default function LandingPage() {
       case 'home':
         return (
           <>
-            <HeroSection />
+            <HeroSection onLearnMoreClick={() => setActiveTab('how-it-works')} />
             <CtaSection />
           </>
         );
@@ -31,7 +31,7 @@ export default function LandingPage() {
       default:
         return (
           <>
-            <HeroSection />
+            <HeroSection onLearnMoreClick={() => setActiveTab('how-it-works')} />
             <CtaSection />
           </>
         );

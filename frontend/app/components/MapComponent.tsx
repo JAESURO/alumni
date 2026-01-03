@@ -160,9 +160,6 @@ function DrawingManager({
 
             const EVENTS = ['bounds_changed', 'radius_changed', 'center_changed', 'mouseup'];
 
-
-
-
             if (e.type === 'circle') {
                 const circle = overlay as google.maps.Circle;
                 google.maps.event.addListener(circle, 'radius_changed', () => {
@@ -259,7 +256,6 @@ function TileLayerOverlay({ tileLayers }: { tileLayers?: { [key: string]: TileLa
                 }
             }
         });
-
 
         const currentKeys = Object.keys(layersRef.current);
         const newKeys = Object.keys(tileLayers || {});
