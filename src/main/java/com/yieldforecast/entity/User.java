@@ -24,6 +24,10 @@ public class User {
 
     private String organization;
 
+    private String telegramChatId;
+
+    private Boolean telegramNotificationsEnabled = false;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
@@ -94,5 +98,21 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getTelegramChatId() {
+        return telegramChatId;
+    }
+
+    public void setTelegramChatId(String telegramChatId) {
+        this.telegramChatId = telegramChatId;
+    }
+
+    public Boolean getTelegramNotificationsEnabled() {
+        return telegramNotificationsEnabled;
+    }
+
+    public void setTelegramNotificationsEnabled(Boolean telegramNotificationsEnabled) {
+        this.telegramNotificationsEnabled = telegramNotificationsEnabled;
     }
 }

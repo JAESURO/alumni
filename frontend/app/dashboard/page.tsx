@@ -12,6 +12,7 @@ import ForecastResults from '../components/dashboard/ForecastResults';
 import ForecastVisualization from '../components/dashboard/ForecastVisualization';
 import NotificationsPanel, { Notification } from '../components/dashboard/NotificationsPanel';
 import LayerControl from '../components/dashboard/LayerControl';
+import TelegramSettings from '../components/dashboard/TelegramSettings';
 
 export default function DashboardPage() {
     const [isForecasting, setIsForecasting] = useState(false);
@@ -610,6 +611,10 @@ export default function DashboardPage() {
                             onDismiss={dismissNotification}
                             onClearAll={clearAllNotifications}
                         />
+                    </div>
+
+                    <div>
+                        <TelegramSettings />
                     </div>
                 </div>
             </main>

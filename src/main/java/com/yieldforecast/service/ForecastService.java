@@ -1,7 +1,9 @@
 package com.yieldforecast.service;
 
 import com.yieldforecast.entity.YieldRecord;
+import com.yieldforecast.entity.User;
 import com.yieldforecast.repository.YieldRecordRepository;
+import com.yieldforecast.repository.UserRepository;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
 @Service
 public class ForecastService {
@@ -26,6 +29,12 @@ public class ForecastService {
 
     @Autowired
     private YieldRecordRepository repository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TelegramNotificationService telegramService;
 
     public String checkAvailability(Map<String, Object> payload) throws Exception {
         Object geometryObj = payload.get("geometry");
@@ -65,6 +74,7 @@ public class ForecastService {
             Object geometryObj = payload.get("geometry");
             if (geometryObj == null) {
                 logger.error("Geometry is null!");
+                notifyForecastError(userId, location, "Geometry is null");
                 return;
             }
 
@@ -95,6 +105,7 @@ public class ForecastService {
             int jsonStart = output.indexOf("{");
             if (jsonStart == -1) {
                 logger.warn("No JSON found in python output");
+                notifyForecastError(userId, location, "No data returned from analysis");
                 return;
             }
 
@@ -106,7 +117,7 @@ public class ForecastService {
         } catch (Exception e) {
             logger.error("Error in processForecast", e);
             logger.error("Exception details: {}", e.getMessage());
-            logger.error("Error saving record", e);
+            notifyForecastError(userId, payload.getOrDefault("location", "Unknown").toString(), e.getMessage());
         }
     }
 
@@ -204,5 +215,39 @@ public class ForecastService {
 
         repository.save(record);
         logger.info("Record saved successfully");
+        
+        // Send Telegram notification
+        notifyForecastCompletion(userId, location, predictedYield);
+    }
+
+    private void notifyForecastCompletion(Long userId, String location, double yield) {
+        try {
+            Optional<User> user = userRepository.findById(userId);
+            if (user.isPresent() && user.get().getTelegramNotificationsEnabled() && user.get().getTelegramChatId() != null) {
+                String yieldFormatted = String.format("%.2f", yield);
+                telegramService.sendForecastCompletionNotification(
+                    user.get().getTelegramChatId(),
+                    location,
+                    yieldFormatted + " units"
+                );
+            }
+        } catch (Exception e) {
+            logger.error("Failed to send forecast completion notification: {}", e.getMessage());
+        }
+    }
+
+    private void notifyForecastError(Long userId, String location, String errorMessage) {
+        try {
+            Optional<User> user = userRepository.findById(userId);
+            if (user.isPresent() && user.get().getTelegramNotificationsEnabled() && user.get().getTelegramChatId() != null) {
+                telegramService.sendForecastErrorNotification(
+                    user.get().getTelegramChatId(),
+                    location,
+                    errorMessage
+                );
+            }
+        } catch (Exception e) {
+            logger.error("Failed to send forecast error notification: {}", e.getMessage());
+        }
     }
 }
