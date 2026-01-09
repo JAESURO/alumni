@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "agrotrack-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,20 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@types/leaflet": "^1.9.21",
-    "@types/leaflet-draw": "^1.0.13",
-    "leaflet": "^1.9.4",
-    "leaflet-control-geocoder": "^3.3.1",
-    "leaflet-draw": "^1.0.4",
+    "@vis.gl/react-google-maps": "^1.7.1",
     "lucide-react": "^0.555.0",
     "next": "16.0.5",
     "react": "19.2.0",
-    "react-dom": "19.2.0",
-    "react-leaflet": "^5.0.0",
-    "react-leaflet-draw": "^0.21.0"
+    "react-dom": "19.2.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -50,7 +50,8 @@ export default function DashboardPage() {
         addNotification({
             type: 'info',
             category: 'system',
-            title: 'Welcome to YieldForecast',
+            title: 'Welcome to AgroTrack',
+
             message: 'Draw a zone on the map to start forecasting crop yields.'
         });
     }, []);
@@ -504,7 +505,7 @@ export default function DashboardPage() {
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-2">
                             <Sprout className="w-8 h-8 text-green-600" />
-                            <span className="text-xl font-bold text-gray-900">YieldForecast Dashboard</span>
+                            <span className="text-xl font-bold text-gray-900">AgroTrack Dashboard</span>
                         </div>
                         <div className="flex items-center space-x-4">
                             <span className="text-gray-600">Welcome, User</span>

@@ -1,4 +1,5 @@
-# Yield Forecast Application
+# AgroTrack
+
 
 A full-stack application for agricultural yield forecasting using satellite imagery from Google Earth Engine. The system analyzes vegetation indices (NDVI, NDMI, RECI) to predict crop yields for user-defined geographic areas.
 

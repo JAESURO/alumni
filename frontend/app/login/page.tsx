@@ -46,9 +46,10 @@ export default function LoginPage() {
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-green-800 mb-2">
-                        🌾 YieldForecast
+                        🌾 AgroTrack
+
                     </h1>
-                    <p className="text-gray-600">Agricultural Intelligence Platform</p>
+                    <p className="text-gray-600">Join the Agricultural Revolution</p>
                 </div>
 
                 <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -141,7 +142,8 @@ export default function LoginPage() {
                         </div>
                         <div className="relative flex justify-center text-sm">
                             <span className="px-4 bg-white text-gray-500">
-                                New to YieldForecast?
+                                New to AgroTrack?
+
                             </span>
                         </div>
                     </div>

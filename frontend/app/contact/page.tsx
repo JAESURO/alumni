@@ -33,7 +33,8 @@ export default function ContactPage() {
                         <Link href="/" className="flex items-center space-x-2">
                             <Sprout className="w-8 h-8 text-green-600" />
                             <span className="text-2xl font-bold text-gray-900">
-                                YieldForecast
+                                AgroTrack
+
                             </span>
                         </Link>
                         <Link
@@ -52,7 +53,8 @@ export default function ContactPage() {
                         Get in Touch
                     </h1>
                     <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Have questions about YieldForecast? We're here to help you maximize
+                        Have questions about AgroTrack? We're here to help you maximize
+
                         your agricultural productivity.
                     </p>
                 </div>
@@ -68,10 +70,12 @@ export default function ContactPage() {
                                 Our team typically responds within 24 hours
                             </p>
                             <a
-                                href="mailto:support@yieldforecast.com"
+                                href="mailto:support@agrotrack.com"
+
                                 className="text-green-600 hover:text-green-700 font-medium"
                             >
-                                support@yieldforecast.com
+                                support@agrotrack.com
+
                             </a>
                         </div>
 
