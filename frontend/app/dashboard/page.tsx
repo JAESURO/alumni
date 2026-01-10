@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import MapWrapper from '../components/MapWrapper';
-import { Sprout, LogOut, Map, TrendingUp, Bell } from 'lucide-react';
+import { Sprout, LogOut, Map, TrendingUp, Bell, Settings, PieChart, Activity } from 'lucide-react';
 import Link from 'next/link';
 import { API_URL } from '../config/api';
 import { YieldRecord, DataAvailability } from '../types/dashboard';
@@ -14,7 +14,10 @@ import NotificationsPanel, { Notification } from '../components/dashboard/Notifi
 import LayerControl from '../components/dashboard/LayerControl';
 import TelegramSettings from '../components/dashboard/TelegramSettings';
 
+type Tab = 'map' | 'launch_settings' | 'results' | 'overview';
+
 export default function DashboardPage() {
+    const [activeTab, setActiveTab] = useState<Tab>('map');
     const [isForecasting, setIsForecasting] = useState(false);
     const [message, setMessage] = useState('');
     const [drawnGeometry, setDrawnGeometry] = useState<any>(null);
@@ -349,6 +352,8 @@ export default function DashboardPage() {
                     title: 'Settings Loaded',
                     message: `Loaded settings from "${record.location}".`
                 });
+                // Switch to map to show the geometry, then user can go to settings to run
+                setActiveTab('map');
             } catch (e) {
             }
         } else if (record.latitude && record.longitude) {
@@ -359,6 +364,8 @@ export default function DashboardPage() {
             setSelectedGeometry(pointGeom);
             setDrawnGeometry(pointGeom);
             setMessage(`Loaded settings from "${record.location}" (Point).`);
+            // Switch to map to show the geometry
+            setActiveTab('map');
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -476,6 +483,8 @@ export default function DashboardPage() {
                         title: 'Forecast Complete',
                         message: `Forecast for "${formData.location}" has been completed successfully.`
                     });
+                    // Switch to results tab when complete
+                    setActiveTab('results');
                 }, 60000);
             } else {
                 setMessage(`Failed to start forecast: ${res.status} ${res.statusText}`);
@@ -500,8 +509,8 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
-            <nav className="bg-white shadow-sm border-b border-gray-200">
+        <div className="min-h-screen bg-gray-50 flex flex-col">
+            <nav className="bg-white shadow-sm border-b border-gray-200 z-10 relative">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center space-x-2">
@@ -515,12 +524,55 @@ export default function DashboardPage() {
                             </Link>
                         </div>
                     </div>
+                    {/* Tab Navigation */}
+                    <div className="flex space-x-8 -mb-px overflow-x-auto">
+                        <button
+                            onClick={() => setActiveTab('map')}
+                            className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === 'map'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                        >
+                            <Map className="w-4 h-4" />
+                            <span>Map</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('launch_settings')}
+                            className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === 'launch_settings'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                        >
+                            <Settings className="w-4 h-4" />
+                            <span>Launch Settings</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('results')}
+                            className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === 'results'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                        >
+                            <Activity className="w-4 h-4" />
+                            <span>Results and Alerts</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('overview')}
+                            className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === 'overview'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                }`}
+                        >
+                            <PieChart className="w-4 h-4" />
+                            <span>Overview</span>
+                        </button>
+                    </div>
                 </div>
             </nav>
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="space-y-8">
-                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border-2 border-green-200">
+            <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+                {activeTab === 'map' && (
+                    <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border-2 border-green-200 h-full flex flex-col">
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="bg-green-600 p-2 rounded-lg">
                                 <Map className="w-6 h-6 text-white" />
@@ -528,9 +580,9 @@ export default function DashboardPage() {
                             <h2 className="text-2xl font-bold text-gray-900">Satellite Map</h2>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-2 space-y-4">
-                                <div className="bg-white rounded-xl shadow-lg p-1 h-[600px]">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+                            <div className="lg:col-span-2 space-y-4 h-[600px] lg:h-auto min-h-[500px]">
+                                <div className="bg-white rounded-xl shadow-lg p-1 h-full">
                                     <MapWrapper
                                         onZoneDrawn={handleZoneDrawn}
                                         onZoneEdited={handleZoneEdited}
@@ -552,19 +604,28 @@ export default function DashboardPage() {
                                     onToggleLayer={toggleLayer}
                                     onOpacityChange={changeOpacity}
                                 />
+                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-200 text-sm">
+                                    <p className="font-semibold text-blue-900 mb-2">Instructions:</p>
+                                    <ul className="list-disc list-inside space-y-1 text-blue-800">
+                                        <li>Use the drawing tools on the map to define a zone.</li>
+                                        <li>Once drawn, switch to "Launch Settings" to run a forecast.</li>
+                                        <li>View results in "Results and Alerts".</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
+                )}
 
+                {activeTab === 'launch_settings' && (
                     <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200">
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="bg-blue-600 p-2 rounded-lg">
-                                <TrendingUp className="w-6 h-6 text-white" />
+                                <Settings className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Forecast Run Results</h2>
+                            <h2 className="text-2xl font-bold text-gray-900">Forecast Launch Settings</h2>
                         </div>
-
-                        <div className="space-y-6">
+                        <div className="max-w-2xl mx-auto">
                             <ForecastSettings
                                 searchQuery={searchQuery}
                                 setSearchQuery={setSearchQuery}
@@ -581,14 +642,19 @@ export default function DashboardPage() {
                                 checkDataAvailability={() => checkDataAvailability(drawnGeometry)}
                                 isCheckingAvailability={isCheckingAvailability}
                             />
+                        </div>
+                    </div>
+                )}
 
-
-
-                            <ForecastVisualization
-                                yieldData={yieldData}
-                                selectedParameter={formData.parameter}
-                            />
-
+                {activeTab === 'results' && (
+                    <div className="space-y-8">
+                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border-2 border-yellow-200">
+                            <div className="flex items-center space-x-3 mb-6">
+                                <div className="bg-yellow-600 p-2 rounded-lg">
+                                    <TrendingUp className="w-6 h-6 text-white" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900">Forecast Results</h2>
+                            </div>
                             <ForecastResults
                                 yieldData={yieldData}
                                 fetchYieldData={fetchYieldData}
@@ -596,27 +662,41 @@ export default function DashboardPage() {
                                 setMessage={setMessage}
                             />
                         </div>
-                    </div>
 
-                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border-2 border-yellow-200">
-                        <div className="flex items-center space-x-3 mb-6">
-                            <div className="bg-yellow-600 p-2 rounded-lg">
-                                <Bell className="w-6 h-6 text-white" />
+                        <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-2xl p-6 border-2 border-red-200">
+                            <div className="flex items-center space-x-3 mb-6">
+                                <div className="bg-red-600 p-2 rounded-lg">
+                                    <Bell className="w-6 h-6 text-white" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900">Notifications & Alerts</h2>
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Notifications & Alerts</h2>
+                            <NotificationsPanel
+                                notifications={notifications}
+                                onDismiss={dismissNotification}
+                                onClearAll={clearAllNotifications}
+                            />
                         </div>
 
-                        <NotificationsPanel
-                            notifications={notifications}
-                            onDismiss={dismissNotification}
-                            onClearAll={clearAllNotifications}
+                        <div className="bg-white rounded-2xl p-6 shadow-md border border-gray-200">
+                            <TelegramSettings />
+                        </div>
+                    </div>
+                )}
+
+                {activeTab === 'overview' && (
+                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl p-6 border-2 border-purple-200">
+                        <div className="flex items-center space-x-3 mb-6">
+                            <div className="bg-purple-600 p-2 rounded-lg">
+                                <PieChart className="w-6 h-6 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900">Overview & Visualization</h2>
+                        </div>
+                        <ForecastVisualization
+                            yieldData={yieldData}
+                            selectedParameter={formData.parameter}
                         />
                     </div>
-
-                    <div>
-                        <TelegramSettings />
-                    </div>
-                </div>
+                )}
             </main>
         </div>
     );
