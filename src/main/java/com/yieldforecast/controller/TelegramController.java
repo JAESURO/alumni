@@ -26,9 +26,6 @@ public class TelegramController {
     @Autowired
     private UserRepository userRepository;
 
-    /**
-     * Enable Telegram notifications and store chat ID
-     */
     @PostMapping("/enable")
     public ResponseEntity<Map<String, Object>> enableTelegramNotifications(
             @RequestBody Map<String, String> request,
@@ -64,9 +61,8 @@ public class TelegramController {
             user.setTelegramNotificationsEnabled(true);
             userRepository.save(user);
 
-            // Test the connection
-            boolean testResult = telegramService.sendNotification(chatId, 
-                "✅ <b>Telegram notifications enabled!</b>\n\nYou will now receive alerts about your forecast results.");
+            boolean testResult = telegramService.sendNotification(chatId,
+                    "✅ <b>Telegram notifications enabled!</b>\n\nYou will now receive alerts about your forecast results.");
 
             response.put("success", testResult);
             response.put("message", testResult ? "Telegram notifications enabled" : "Failed to send test notification");
@@ -79,9 +75,6 @@ public class TelegramController {
         }
     }
 
-    /**
-     * Disable Telegram notifications
-     */
     @PostMapping("/disable")
     public ResponseEntity<Map<String, Object>> disableTelegramNotifications(
             HttpSession session) {
@@ -118,9 +111,6 @@ public class TelegramController {
         }
     }
 
-    /**
-     * Get Telegram notification settings
-     */
     @GetMapping("/settings")
     public ResponseEntity<Map<String, Object>> getTelegramSettings(
             HttpSession session) {
@@ -143,8 +133,12 @@ public class TelegramController {
             }
 
             User user = userOpt.get();
-            response.put("enabled", user.getTelegramNotificationsEnabled() != null && user.getTelegramNotificationsEnabled());
-            response.put("chatId", user.getTelegramChatId() != null ? "***" + user.getTelegramChatId().substring(user.getTelegramChatId().length() - 4) : null);
+            response.put("enabled",
+                    user.getTelegramNotificationsEnabled() != null && user.getTelegramNotificationsEnabled());
+            response.put("chatId",
+                    user.getTelegramChatId() != null
+                            ? "***" + user.getTelegramChatId().substring(user.getTelegramChatId().length() - 4)
+                            : null);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error retrieving Telegram settings: {}", e.getMessage());
@@ -154,9 +148,6 @@ public class TelegramController {
         }
     }
 
-    /**
-     * Test Telegram connection
-     */
     @GetMapping("/test")
     public ResponseEntity<Map<String, Object>> testTelegramConnection(
             HttpSession session) {
@@ -187,7 +178,7 @@ public class TelegramController {
             }
 
             boolean success = telegramService.sendNotification(user.getTelegramChatId(),
-                "🔔 <b>Test notification from AgroTrack</b>\n\nIf you see this message, Telegram notifications are working correctly!");
+                    "🔔 <b>Test notification from AgroTrack</b>\n\nIf you see this message, Telegram notifications are working correctly!");
 
             response.put("success", success);
             response.put("message", success ? "Test notification sent" : "Failed to send test notification");

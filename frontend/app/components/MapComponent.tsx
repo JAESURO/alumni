@@ -218,7 +218,6 @@ function TileLayerOverlay({ tileLayers }: { tileLayers?: { [key: string]: TileLa
 
                 if (!existing || existing.url !== data.url) {
                     if (existing) {
-
                         const index = map.overlayMapTypes.getArray().indexOf(existing.instance);
                         if (index > -1) {
                             map.overlayMapTypes.removeAt(index);
@@ -246,7 +245,6 @@ function TileLayerOverlay({ tileLayers }: { tileLayers?: { [key: string]: TileLa
             } else {
 
                 if (layersRef.current[key]) {
-
                     const existing = layersRef.current[key];
                     const index = map.overlayMapTypes.getArray().indexOf(existing.instance);
                     if (index > -1) {
@@ -282,7 +280,6 @@ function SelectedGeometry({ geometry }: { geometry: any }) {
 
     useEffect(() => {
         if (!map) return;
-
 
         if (overlayRef.current) {
             overlayRef.current.setMap(null);

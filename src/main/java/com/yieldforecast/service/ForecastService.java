@@ -215,21 +215,20 @@ public class ForecastService {
 
         repository.save(record);
         logger.info("Record saved successfully");
-        
-        // Send Telegram notification
+
         notifyForecastCompletion(userId, location, predictedYield);
     }
 
     private void notifyForecastCompletion(Long userId, String location, double yield) {
         try {
             Optional<User> user = userRepository.findById(userId);
-            if (user.isPresent() && user.get().getTelegramNotificationsEnabled() && user.get().getTelegramChatId() != null) {
+            if (user.isPresent() && user.get().getTelegramNotificationsEnabled()
+                    && user.get().getTelegramChatId() != null) {
                 String yieldFormatted = String.format("%.2f", yield);
                 telegramService.sendForecastCompletionNotification(
-                    user.get().getTelegramChatId(),
-                    location,
-                    yieldFormatted + " units"
-                );
+                        user.get().getTelegramChatId(),
+                        location,
+                        yieldFormatted + " units");
             }
         } catch (Exception e) {
             logger.error("Failed to send forecast completion notification: {}", e.getMessage());
@@ -239,12 +238,12 @@ public class ForecastService {
     private void notifyForecastError(Long userId, String location, String errorMessage) {
         try {
             Optional<User> user = userRepository.findById(userId);
-            if (user.isPresent() && user.get().getTelegramNotificationsEnabled() && user.get().getTelegramChatId() != null) {
+            if (user.isPresent() && user.get().getTelegramNotificationsEnabled()
+                    && user.get().getTelegramChatId() != null) {
                 telegramService.sendForecastErrorNotification(
-                    user.get().getTelegramChatId(),
-                    location,
-                    errorMessage
-                );
+                        user.get().getTelegramChatId(),
+                        location,
+                        errorMessage);
             }
         } catch (Exception e) {
             logger.error("Failed to send forecast error notification: {}", e.getMessage());

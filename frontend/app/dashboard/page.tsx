@@ -352,7 +352,6 @@ export default function DashboardPage() {
                     title: 'Settings Loaded',
                     message: `Loaded settings from "${record.location}".`
                 });
-                // Switch to map to show the geometry, then user can go to settings to run
                 setActiveTab('map');
             } catch (e) {
             }
@@ -364,7 +363,6 @@ export default function DashboardPage() {
             setSelectedGeometry(pointGeom);
             setDrawnGeometry(pointGeom);
             setMessage(`Loaded settings from "${record.location}" (Point).`);
-            // Switch to map to show the geometry
             setActiveTab('map');
         }
 
@@ -483,7 +481,6 @@ export default function DashboardPage() {
                         title: 'Forecast Complete',
                         message: `Forecast for "${formData.location}" has been completed successfully.`
                     });
-                    // Switch to results tab when complete
                     setActiveTab('results');
                 }, 60000);
             } else {
@@ -524,13 +521,12 @@ export default function DashboardPage() {
                             </Link>
                         </div>
                     </div>
-                    {/* Tab Navigation */}
                     <div className="flex space-x-8 -mb-px overflow-x-auto">
                         <button
                             onClick={() => setActiveTab('map')}
                             className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === 'map'
-                                    ? 'border-green-500 text-green-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-green-500 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             <Map className="w-4 h-4" />
@@ -539,8 +535,8 @@ export default function DashboardPage() {
                         <button
                             onClick={() => setActiveTab('launch_settings')}
                             className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === 'launch_settings'
-                                    ? 'border-green-500 text-green-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-green-500 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             <Settings className="w-4 h-4" />
@@ -549,8 +545,8 @@ export default function DashboardPage() {
                         <button
                             onClick={() => setActiveTab('results')}
                             className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === 'results'
-                                    ? 'border-green-500 text-green-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-green-500 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             <Activity className="w-4 h-4" />
@@ -559,8 +555,8 @@ export default function DashboardPage() {
                         <button
                             onClick={() => setActiveTab('overview')}
                             className={`whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${activeTab === 'overview'
-                                    ? 'border-green-500 text-green-600'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                ? 'border-green-500 text-green-600'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                 }`}
                         >
                             <PieChart className="w-4 h-4" />
@@ -571,7 +567,7 @@ export default function DashboardPage() {
             </nav>
 
             <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-                {activeTab === 'map' && (
+                <div className={activeTab === 'map' ? 'block h-full' : 'hidden'}>
                     <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl p-6 border-2 border-green-200 h-full flex flex-col">
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="bg-green-600 p-2 rounded-lg">
@@ -587,7 +583,7 @@ export default function DashboardPage() {
                                         onZoneDrawn={handleZoneDrawn}
                                         onZoneEdited={handleZoneEdited}
                                         onZoneDeleted={handleZoneDeleted}
-                                        selectedGeometry={selectedGeometry}
+                                        selectedGeometry={selectedGeometry || drawnGeometry}
                                         mapCenter={mapCenter}
                                         tileLayers={tileLayers}
                                     />
@@ -608,16 +604,35 @@ export default function DashboardPage() {
                                     <p className="font-semibold text-blue-900 mb-2">Instructions:</p>
                                     <ul className="list-disc list-inside space-y-1 text-blue-800">
                                         <li>Use the drawing tools on the map to define a zone.</li>
-                                        <li>Once drawn, switch to "Launch Settings" to run a forecast.</li>
+                                        <li><strong>Tip:</strong> You can run the forecast directly from here!</li>
                                         <li>View results in "Results and Alerts".</li>
                                     </ul>
                                 </div>
+                                <button
+                                    onClick={() => {
+                                        if (drawnGeometry) {
+                                            setActiveTab('launch_settings');
+                                        } else {
+                                            setMessage('Please draw a zone first.');
+                                            addNotification({
+                                                type: 'warning',
+                                                category: 'system',
+                                                title: 'No Zone Selected',
+                                                message: 'Please draw a zone on the map first.'
+                                            });
+                                        }
+                                    }}
+                                    className="w-full bg-green-600 text-white px-4 py-3 rounded-xl font-bold hover:bg-green-700 transition shadow-lg flex items-center justify-center space-x-2"
+                                >
+                                    <Settings className="w-5 h-5" />
+                                    <span>Configure & Run Forecast</span>
+                                </button>
                             </div>
                         </div>
                     </div>
-                )}
+                </div>
 
-                {activeTab === 'launch_settings' && (
+                <div className={activeTab === 'launch_settings' ? 'block' : 'hidden'}>
                     <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border-2 border-blue-200">
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="bg-blue-600 p-2 rounded-lg">
@@ -644,7 +659,7 @@ export default function DashboardPage() {
                             />
                         </div>
                     </div>
-                )}
+                </div>
 
                 {activeTab === 'results' && (
                     <div className="space-y-8">
