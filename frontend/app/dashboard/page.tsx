@@ -560,7 +560,7 @@ export default function DashboardPage() {
                                 }`}
                         >
                             <PieChart className="w-4 h-4" />
-                            <span>Overview</span>
+                            <span>Monitoring & Visualization</span>
                         </button>
                     </div>
                 </div>
@@ -573,7 +573,10 @@ export default function DashboardPage() {
                             <div className="bg-green-600 p-2 rounded-lg">
                                 <Map className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Satellite Map</h2>
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Satellite Map</h2>
+                                <p className="text-sm text-gray-500 font-normal">system for monitoring and analysis</p>
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
@@ -638,7 +641,10 @@ export default function DashboardPage() {
                             <div className="bg-blue-600 p-2 rounded-lg">
                                 <Settings className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Forecast Launch Settings</h2>
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Forecast Launch Settings</h2>
+                                <p className="text-sm text-gray-500 font-normal">system for monitoring and analysis</p>
+                            </div>
                         </div>
                         <div className="max-w-2xl mx-auto">
                             <ForecastSettings
@@ -668,7 +674,10 @@ export default function DashboardPage() {
                                 <div className="bg-yellow-600 p-2 rounded-lg">
                                     <TrendingUp className="w-6 h-6 text-white" />
                                 </div>
-                                <h2 className="text-2xl font-bold text-gray-900">Forecast Results</h2>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900">Forecast Results</h2>
+                                    <p className="text-sm text-gray-500 font-normal">system for monitoring and analysis</p>
+                                </div>
                             </div>
                             <ForecastResults
                                 yieldData={yieldData}
@@ -704,7 +713,10 @@ export default function DashboardPage() {
                             <div className="bg-purple-600 p-2 rounded-lg">
                                 <PieChart className="w-6 h-6 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-gray-900">Overview & Visualization</h2>
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Overview & Visualization</h2>
+                                <p className="text-sm text-gray-500 font-normal">system for monitoring and analysis</p>
+                            </div>
                         </div>
                         <ForecastVisualization
                             yieldData={yieldData}

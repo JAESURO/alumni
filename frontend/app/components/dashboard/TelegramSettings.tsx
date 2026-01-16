@@ -19,7 +19,7 @@ export default function TelegramSettings() {
         method: 'GET',
         credentials: 'include',
       });
-      
+
       if (!response.ok) {
         console.error('Failed to fetch settings:', response.status, response.statusText);
         if (response.status === 401) {
@@ -28,7 +28,7 @@ export default function TelegramSettings() {
         }
         return;
       }
-      
+
       const data = await response.json();
       setIsEnabled(data.enabled || false);
       setChatId(data.chatId || '');
@@ -165,7 +165,7 @@ export default function TelegramSettings() {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <h3 className="font-semibold text-blue-900 mb-2">How to Get Your Telegram Chat ID:</h3>
         <ol className="list-decimal list-inside text-blue-800 space-y-2 text-sm">
-          <li>Open Telegram and search for <code className="bg-white px-2 py-1 rounded">@userinfobot</code></li>
+          <li>Open Telegram and search for <a href="https://t.me/agro_track_bot" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-blue-600">@agro_track_bot</a></li>
           <li>Send the command <code className="bg-white px-2 py-1 rounded">/start</code></li>
           <li>Copy your numeric Chat ID (e.g., 123456789)</li>
         </ol>
@@ -205,7 +205,7 @@ export default function TelegramSettings() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
             <h3 className="text-2xl font-bold text-gray-800 mb-4">Enable Telegram Notifications</h3>
-            
+
             <label className="block text-gray-700 font-semibold mb-2">Chat ID</label>
             <input
               type="text"
