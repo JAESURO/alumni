@@ -165,9 +165,11 @@ export default function TelegramSettings() {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <h3 className="font-semibold text-blue-900 mb-2">How to Get Your Telegram Chat ID:</h3>
         <ol className="list-decimal list-inside text-blue-800 space-y-2 text-sm">
+          <li>Open Telegram and search for <a href="https://t.me/userinfobot" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-blue-600">@userinfobot</a></li>
+          <li>Send the command <code className="bg-white px-2 py-1 rounded">/user</code></li>
+          <li>Copy your numeric Chat ID (e.g., 123456789)</li>
           <li>Open Telegram and search for <a href="https://t.me/agro_track_bot" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-blue-600">@agro_track_bot</a></li>
           <li>Send the command <code className="bg-white px-2 py-1 rounded">/start</code></li>
-          <li>Copy your numeric Chat ID (e.g., 123456789)</li>
         </ol>
       </div>
 
