@@ -1,21 +1,50 @@
 # AgroTrack
 
-
-A full-stack application for agricultural yield forecasting using satellite imagery from Google Earth Engine. The system analyzes vegetation indices (NDVI, NDMI, RECI) to predict crop yields for user-defined geographic areas.
+A full-stack application for agricultural yield forecasting using satellite imagery from Google Earth Engine. The system analyzes vegetation indices (NDVI, NDMI, RECI) to predict crop yields for user-defined geographic areas and provides notifications via Telegram.
 
 ## Features
 
-- User authentication with session-based security
-- Interactive map interface with zone drawing and editing
-- Satellite data analysis using Sentinel-2 imagery
-- Multiple vegetation indices (NDVI, NDMI, RECI)
-- Concurrent forecast processing
-- User-specific data isolation
+- **Interactive Mapping**: Search and select locations, then draw customized forecast zones (circles, rectangles, or polygons).
+- **Satellite Analysis**: Integration with Sentinel-2 imagery via Google Earth Engine for real-time data processing.
+- **Vegetation Indices**: Support for multiple indices including NDVI, NDMI, and RECI.
+- **Concurrent Processing**: Backend designed to handle multiple forecast requests simultaneously.
+- **Telegram Notifications**: Real-time alerts and forecast results sent directly to your Telegram bot.
+- **Secure Authentication**: Session-based security with user-specific data isolation and record management.
+
+## Project Structure
+
+```text
+.
+├── bin/                    # Automation and execution scripts
+├── frontend/               # Next.js web application
+├── src/
+│   ├── main/
+│   │   ├── java/           # Spring Boot backend source
+│   │   ├── python/         # GEE processing and forecasting scripts
+│   │   └── resources/      # Backend configuration (application.properties)
+├── pom.xml                 # Maven configuration
+└── yield_forecast.db       # SQLite database (auto-generated)
+```
 
 ## Tech Stack
 
-**Backend**: Java 17+ with Spring Boot 3.2, Spring Security, SQLite, Python 3.9+  
-**Frontend**: Next.js 16, React, TypeScript, Leaflet, Tailwind CSS
+**Frontend**:
+- Next.js 16.0.5
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Google Maps Platform (JavaScript API)
+
+**Backend**:
+- Java 17
+- Spring Boot 3.2.0
+- Spring Security
+- SQLite
+- Python 3.9+
+
+**External APIs**:
+- Google Earth Engine
+- Telegram Bot API
 
 ## Prerequisites
 
@@ -24,6 +53,7 @@ A full-stack application for agricultural yield forecasting using satellite imag
 - Node.js 18+
 - Python 3.9+ with virtual environment
 - Google Earth Engine account
+- Telegram Bot
 
 ## Setup
 
@@ -38,13 +68,11 @@ cd code
 ### 2. Environment Configuration
 
 **Backend:**
-```bash
-cp .env.example .env
-```
-Edit `.env`:
+Copy `.env.example` to `.env` and configure:
 ```bash
 PYTHON_VENV_PATH=/path/to/your/venv/bin/python3
 GEE_PROJECT_ID=your-gee-project-id
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 ```
 
 **Frontend:**
@@ -52,26 +80,24 @@ GEE_PROJECT_ID=your-gee-project-id
 cd frontend
 cp .env.example .env.local
 ```
-Edit `.env.local` (optional):
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:8080
-```
 
-### 3. Google Earth Engine
+### 3. Google Earth Engine Authentication
 
 ```bash
 earthengine authenticate
 ```
 
-## Running
+## Running the Application
 
-**Backend:**
+### Backend
+Start the Spring Boot server:
 ```bash
 ./bin/run_backend.sh
 ```
 Runs on `http://localhost:8080`
 
-**Frontend:**
+### Frontend
+Start the Next.js development server:
 ```bash
 ./bin/run_frontend.sh
 ```
